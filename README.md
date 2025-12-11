@@ -97,26 +97,14 @@ I want to create a new skill for code review. Use devskills.
 
 The server exposes four tools for skill discovery and retrieval:
 
-### `list_skills()`
+- **`list_skills()`** - Lists all available skills with their name and description. Can be used to discover what skills exist.
 
-Returns all available skills with name and description. Call this first to discover what skills are available.
+- **`get_skill(name)`** - Retrieves the full SKILL.md content for a specific skill, including instructions and workflow steps.
 
-### `get_skill(name)`
+- **`get_script(skill, filename)`** - Retrieves a script file from a skill's `scripts/` folder. Scripts are executable code (Python, Bash, etc.) that can be run locally.
 
-Returns the full SKILL.md content for a skill. After fetching, follow the instructions in the returned content. If the skill references scripts or references, fetch them with the tools below.
-
-### `get_script(skill, filename)`
-
-Returns raw script content from a skill's `scripts/` folder. Only call when skill instructions explicitly reference a script. Execute the script locally following the skill's instructions.
-
-### `get_reference(skill, filename)`
-
-Returns reference documentation from a skill's `references/` folder. Only call when skill instructions explicitly reference a document.
+- **`get_reference(skill, filename)`** - Retrieves a reference document from a skill's `references/` folder. References provide additional context like schemas, patterns, or documentation.
 
 ## MCP Resources
 
-Root-level reference documents in `references/` are exposed as MCP resources:
-
-| Resource | Description |
-|----------|-------------|
-| `references://{filename}` | Get a root-level reference document |
+The server also exposes root-level reference documents as MCP resources. Files in the `references/` directory are available via `references://{filename}`. These provide project-wide guidelines and standards that aren't tied to a specific skill.
