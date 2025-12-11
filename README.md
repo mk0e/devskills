@@ -2,15 +2,32 @@
 
 Central repo for reusable AI coding agent skills, exposed via MCP. Define workflows once, use across Claude Code, Cursor, GitHub Copilot, and other MCP-compatible tools.
 
-## What Are Skills?
+## Why Skills?
 
-Skills are reusable instruction sets that tell AI agents how to accomplish specific tasks. A skill bundles:
+AI coding agents are powerful but generic. They don't know your team's conventions, deployment processes, or domain-specific patterns. Every time you ask for help, you repeat the same context.
 
-- **Instructions** (SKILL.md) - what to do, when to use it
-- **Scripts** - pre-built utilities the agent can run
-- **Reference docs** - reference material loaded on demand
+**Skills solve this by packaging reusable knowledge:**
 
-Example: a `code-review` skill contains instructions for reviewing PRs, a Python script for static analysis, and a patterns doc explaining what to flag.
+- **Consistency** - The same workflow runs the same way every time, across any MCP-compatible agent
+- **Efficiency** - Stop re-explaining your PR review checklist, deployment steps, or coding standards
+- **Shareability** - Create once, use across your team and tools
+- **Progressive loading** - Only load what's needed: metadata first, then instructions, then scripts/references
+
+### What Skills Provide
+
+1. **Specialized workflows** - Multi-step procedures for specific domains (code review, deployment, migrations)
+2. **Tool integrations** - Instructions for working with specific file formats, APIs, or services
+3. **Domain expertise** - Company-specific knowledge, schemas, business logic
+4. **Bundled resources** - Scripts and references for complex and repetitive tasks
+
+### Example
+
+A `code-review` skill might contain:
+- **SKILL.md** - Instructions for reviewing PRs with your team's standards
+- **scripts/analyze.py** - Static analysis script that flags common issues
+- **references/patterns.md** - Document explaining what patterns to flag and why
+
+When you say "Review this PR. Use devskills.", the agent loads the skill and follows your team's exact review process.
 
 ## How It Works
 
@@ -38,47 +55,21 @@ The MCP server delivers skill content. Agents execute scripts in their own envir
 
 ## Quick Start
 
+### Prerequisites
+
+- [uv](https://docs.astral.sh/uv/) - Fast Python package manager
+
 ### 1. Clone and Install
 
 ```bash
 git clone https://github.com/your-org/devskills.git
 cd devskills
-uv sync  # or: pip install -e .
+uv sync
 ```
 
-### 2. Configure Your Agent
+### 2. Configure Your AI Coding Agent
 
-**Claude Code:**
-```bash
-claude mcp add devskills \
-  --transport stdio \
-  -- uv run --directory /path/to/devskills python -m server
-```
-
-**Cursor** (add to `~/.cursor/mcp.json`):
-```json
-{
-  "mcpServers": {
-    "devskills": {
-      "command": "uv",
-      "args": ["run", "--directory", "/path/to/devskills", "python", "-m", "server"]
-    }
-  }
-}
-```
-
-**GitHub Copilot** (add to `.vscode/mcp.json`):
-```json
-{
-  "servers": {
-    "devskills": {
-      "type": "stdio",
-      "command": "uv",
-      "args": ["run", "--directory", "/path/to/devskills", "python", "-m", "server"]
-    }
-  }
-}
-```
+See [Setup Guide](docs/setup.md) for detailed instructions for Claude Code, GitHub Copilot, and Cursor.
 
 ### 3. Use Skills
 
@@ -95,77 +86,37 @@ If a relevant skill exists, fetch it with get_skill(name) and follow its instruc
 
 ## Creating Skills
 
-Use the `skill-creator` skill to create new skills:
+See [Creating Skills](docs/creating-skills.md) for the full guide.
 
+**Quick start:** Use the built-in `skill-creator` skill:
 ```
-I want to create a new skill. Use devskills.
-```
-
-Or manually create a skill directory:
-
-```
-skills/my-skill/
-├── SKILL.md           # Required: instructions with YAML frontmatter
-├── scripts/           # Optional: executable scripts
-└── references/        # Optional: reference documentation
-```
-
-Example `SKILL.md`:
-```yaml
----
-name: my-skill
-description: Brief description shown in list_skills()
----
-
-## When to Use
-Describe when this skill applies.
-
-## Instructions
-1. Step one
-2. Run `scripts/analyze.py` on target files
-3. See `references/patterns.md` for guidelines
-```
-
-## Project-Local Skills
-
-Add project-specific skills in `.devskills/skills/`:
-
-```
-my-project/
-├── .devskills/
-│   └── skills/
-│       └── deploy/
-│           └── SKILL.md
-└── src/
-```
-
-Configure with `DEVSKILLS_LOCAL_SKILLS` env var:
-
-```bash
-claude mcp add devskills \
-  --transport stdio \
-  --env DEVSKILLS_LOCAL_SKILLS="./.devskills/skills" \
-  -- uv run --directory /path/to/devskills python -m server
-```
-
-Local skills override repo skills with the same name.
-
-## Repository Structure
-
-```
-devskills/
-├── skills/           # Skill definitions
-│   ├── example/      # Example skill for testing
-│   └── skill-creator/# Skill for creating new skills
-├── server/           # Python MCP server
-└── plan/             # Implementation plans
+I want to create a new skill for code review. Use devskills.
 ```
 
 ## MCP Tools
 
-| Tool | Description |
-|------|-------------|
-| `list_skills()` | List all skills with name and description |
-| `get_skill(name)` | Get SKILL.md content |
-| `get_script(skill, filename)` | Get script content |
-| `get_reference(skill, filename)` | Get reference document |
+The server exposes four tools for skill discovery and retrieval:
+
+### `list_skills()`
+
+Returns all available skills with name and description. Call this first to discover what skills are available.
+
+### `get_skill(name)`
+
+Returns the full SKILL.md content for a skill. After fetching, follow the instructions in the returned content. If the skill references scripts or references, fetch them with the tools below.
+
+### `get_script(skill, filename)`
+
+Returns raw script content from a skill's `scripts/` folder. Only call when skill instructions explicitly reference a script. Execute the script locally following the skill's instructions.
+
+### `get_reference(skill, filename)`
+
+Returns reference documentation from a skill's `references/` folder. Only call when skill instructions explicitly reference a document.
+
+## MCP Resources
+
+Root-level reference documents in `references/` are exposed as MCP resources:
+
+| Resource | Description |
+|----------|-------------|
+| `references://{filename}` | Get a root-level reference document |

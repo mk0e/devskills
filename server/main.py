@@ -1,5 +1,7 @@
 """MCP server for devskills - exposes skills as tools."""
 
+from pathlib import Path
+
 from mcp.server.fastmcp import FastMCP
 
 from .skills import SkillManager
@@ -66,6 +68,30 @@ def get_reference(skill: str, filename: str) -> str:
     Read and apply this reference when following the skill's instructions.
     """
     return skills.get_reference(skill, filename)
+
+
+@mcp.resource("references://{filename}")
+def get_reference_file(filename: str) -> str:
+    """Get a root-level reference document.
+
+    Reference files provide project-wide guidelines, standards, and documentation.
+    Available files are stored in the references/ directory.
+
+    Args:
+        filename: Name of the reference file (e.g., 'coding-guidelines.md')
+
+    Returns:
+        Content of the reference file.
+    """
+    references_dir = Path(__file__).parent.parent / "references"
+    file_path = references_dir / filename
+    if not file_path.exists():
+        available = [f.name for f in references_dir.iterdir() if f.is_file()] if references_dir.exists() else []
+        raise FileNotFoundError(
+            f"Reference file not found: {filename}. "
+            f"Available files: {', '.join(available) if available else 'none'}"
+        )
+    return file_path.read_text()
 
 
 def run():
