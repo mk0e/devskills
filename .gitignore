@@ -1,4 +1,6 @@
 .claude
 .venv
+__pycache__/
+*.pyc
 plan
 project-idea.md
