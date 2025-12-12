@@ -1,6 +1,6 @@
 [project]
 name = "devskills"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP server exposing reusable skills for AI coding agents"
 readme = "README.md"
 license = "MIT"
@@ -26,10 +26,10 @@ dependencies = [
 devskills = "devskills.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/kontext-e/devskills"
-Documentation = "https://github.com/kontext-e/devskills#readme"
-Repository = "https://github.com/kontext-e/devskills"
-Issues = "https://github.com/kontext-e/devskills/issues"
+Homepage = "https://github.com/mk0e/devskills"
+Documentation = "https://github.com/mk0e/devskills#readme"
+Repository = "https://github.com/mk0e/devskills"
+Issues = "https://github.com/mk0e/devskills/issues"
 
 [build-system]
 requires = ["hatchling"]
