@@ -1,5 +1,6 @@
 """MCP server for devskills - exposes skills as tools."""
 
+from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, Field
 
