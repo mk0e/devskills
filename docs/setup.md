@@ -6,26 +6,27 @@ This guide covers how to configure devskills with different AI coding agents.
 
 - [uv](https://docs.astral.sh/uv/) - Fast Python package manager (for `uvx` command)
 
-## Claude Code
+## Recommended: Use `devskills init`
 
-### Quick Setup
+The easiest way to set up devskills is to initialize a team skills repository:
 
-Add to your project's `.claude/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "devskills": {
-      "command": "uvx",
-      "args": ["devskills"]
-    }
-  }
-}
+```bash
+uvx devskills init my-team-skills
 ```
 
-### With Custom Skills
+This creates pre-configured MCP settings for all agents with `--skills-path ./skills` already included.
 
-Point to your team's skills directory:
+---
+
+## Manual Configuration
+
+If you prefer to configure manually, see the agent-specific instructions below.
+
+> **Important:** Always include `--skills-path ./skills` to use your custom skills. Without it, only bundled skills are available.
+
+## Claude Code
+
+Add to your project's `.claude/mcp.json`:
 
 ```json
 {
@@ -41,13 +42,7 @@ Point to your team's skills directory:
 ### Global Setup (CLI)
 
 ```bash
-claude mcp add devskills -- uvx devskills
-```
-
-Or with custom skills:
-
-```bash
-claude mcp add devskills -- uvx devskills --skills-path ~/my-skills
+claude mcp add devskills -- uvx devskills --skills-path ./skills
 ```
 
 ### Verify Installation
@@ -97,20 +92,6 @@ Create or edit `.vscode/mcp.json` in your project:
     "devskills": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["devskills"]
-    }
-  }
-}
-```
-
-With custom skills:
-
-```json
-{
-  "servers": {
-    "devskills": {
-      "type": "stdio",
-      "command": "uvx",
       "args": ["devskills", "--skills-path", "./skills"]
     }
   }
@@ -134,19 +115,6 @@ In Copilot Chat, reference skills:
 ## Cursor
 
 Create or edit `.cursor/mcp.json` in your home directory (global) or project root (project-specific):
-
-```json
-{
-  "mcpServers": {
-    "devskills": {
-      "command": "uvx",
-      "args": ["devskills"]
-    }
-  }
-}
-```
-
-With custom skills:
 
 ```json
 {

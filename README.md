@@ -15,9 +15,49 @@ AI coding agents are powerful but generic. They don't know your team's conventio
 
 ## Quick Start
 
-### For Individual Use
+### For Teams (Recommended)
 
-Add devskills to your agent's MCP config. No installation needed - `uvx` handles everything.
+Initialize a team skills repository with pre-configured MCP settings:
+
+```bash
+uvx devskills init my-team-skills
+cd my-team-skills
+git init && git add . && git commit -m "Initial commit"
+```
+
+This creates:
+```
+my-team-skills/
+├── skills/                  # Your custom skills go here
+├── .claude/mcp.json         # Pre-configured for Claude Code
+├── .vscode/mcp.json         # Pre-configured for GitHub Copilot
+├── .cursor/mcp.json         # Pre-configured for Cursor
+├── .gitignore
+└── README.md
+```
+
+The generated MCP configs already include `--skills-path ./skills`:
+```json
+{
+  "mcpServers": {
+    "devskills": {
+      "command": "uvx",
+      "args": ["devskills", "--skills-path", "./skills"]
+    }
+  }
+}
+```
+
+Create your first skill:
+```bash
+uvx devskills init-skill code-review --path ./skills
+```
+
+Team members clone the repo, and their agents automatically get access to team skills plus bundled defaults.
+
+### Manual Setup
+
+If you want to add devskills to an existing project manually:
 
 **Claude Code** (`.claude/mcp.json`):
 ```json
@@ -25,7 +65,7 @@ Add devskills to your agent's MCP config. No installation needed - `uvx` handles
   "mcpServers": {
     "devskills": {
       "command": "uvx",
-      "args": ["devskills"]
+      "args": ["devskills", "--skills-path", "./skills"]
     }
   }
 }
@@ -38,7 +78,7 @@ Add devskills to your agent's MCP config. No installation needed - `uvx` handles
     "devskills": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["devskills"]
+      "args": ["devskills", "--skills-path", "./skills"]
     }
   }
 }
@@ -50,44 +90,13 @@ Add devskills to your agent's MCP config. No installation needed - `uvx` handles
   "mcpServers": {
     "devskills": {
       "command": "uvx",
-      "args": ["devskills"]
+      "args": ["devskills", "--skills-path", "./skills"]
     }
   }
 }
 ```
 
-Then ask your agent:
-```
-I want to create a new skill. Use devskills.
-```
-
-### For Teams (Custom Skills)
-
-Initialize a new team skills repository:
-
-```bash
-uvx devskills init my-team-skills
-cd my-team-skills
-git init && git add . && git commit -m "Initial commit"
-```
-
-This creates:
-```
-my-team-skills/
-├── skills/
-├── .claude/mcp.json
-├── .vscode/mcp.json
-├── .cursor/mcp.json
-├── .gitignore
-└── README.md
-```
-
-Then create your first skill:
-```bash
-uvx devskills init-skill code-review --path ./skills
-```
-
-Team members clone the repo, and their agents automatically get access to team skills plus bundled defaults.
+> **Note:** Without `--skills-path`, only bundled skills are available. Add `--skills-path ./skills` to include your custom skills.
 
 ## How It Works
 
