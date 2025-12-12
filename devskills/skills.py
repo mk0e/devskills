@@ -2,6 +2,7 @@
 
 import os
 import re
+import warnings
 from pathlib import Path
 
 import yaml
@@ -13,39 +14,82 @@ class SkillManager:
     Skills are directories containing a SKILL.md file with YAML frontmatter.
     Optional scripts/ and references/ subdirectories contain supporting files.
 
-    Skill paths are configured via:
-    - DEVSKILLS_LOCAL_SKILLS env var (for user-defined skills)
-    - Default: skills/ directory in the repo root
+    Skill paths are configured via (in priority order):
+    1. extra_paths parameter (from CLI --skills-path)
+    2. DEVSKILLS_SKILLS_PATH env var (colon-separated paths)
+    3. DEVSKILLS_LOCAL_SKILLS env var (deprecated, for backward compat)
+    4. Bundled skills in the package (lowest priority, always included)
 
-    Local skills override repo skills when names match.
+    Skills from higher priority sources override those with matching names.
     """
 
-    def __init__(self) -> None:
-        """Initialize SkillManager with skill paths from env + default."""
+    def __init__(
+        self,
+        extra_paths: list[Path] | None = None,
+        include_bundled: bool = True,
+    ) -> None:
+        """Initialize SkillManager with skill paths.
+
+        Args:
+            extra_paths: Additional skill directories (highest priority).
+            include_bundled: Whether to include bundled default skills.
+        """
         self._skill_paths: list[Path] = []
+        self._writable_paths: list[Path] = []  # User-provided paths for skill creation
 
-        # Default skills directory (repo root / skills)
-        repo_root = Path(__file__).parent.parent
-        default_skills = repo_root / "skills"
-        if default_skills.exists():
-            self._skill_paths.append(default_skills)
+        # 1. Extra paths from CLI (highest priority)
+        if extra_paths:
+            for path in extra_paths:
+                expanded = Path(path).expanduser().resolve()
+                if expanded.exists():
+                    self._skill_paths.append(expanded)
+                    self._writable_paths.append(expanded)
 
-        # Local skills from env var (takes precedence)
+        # 2. DEVSKILLS_SKILLS_PATH env var (colon-separated)
+        env_paths = os.environ.get("DEVSKILLS_SKILLS_PATH", "")
+        for path_str in env_paths.split(":"):
+            if path_str.strip():
+                path = Path(path_str.strip()).expanduser().resolve()
+                if path.exists() and path not in self._skill_paths:
+                    self._skill_paths.append(path)
+                    self._writable_paths.append(path)
+
+        # 3. Backward compat: DEVSKILLS_LOCAL_SKILLS (deprecated)
         local_skills_env = os.environ.get("DEVSKILLS_LOCAL_SKILLS")
         if local_skills_env:
-            local_path = Path(local_skills_env).expanduser()
-            if local_path.exists():
-                self._skill_paths.insert(0, local_path)  # Local first for override
+            warnings.warn(
+                "DEVSKILLS_LOCAL_SKILLS is deprecated. "
+                "Use DEVSKILLS_SKILLS_PATH or --skills-path instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            local_path = Path(local_skills_env).expanduser().resolve()
+            if local_path.exists() and local_path not in self._skill_paths:
+                self._skill_paths.append(local_path)
+                self._writable_paths.append(local_path)
+
+        # 4. Bundled skills (lowest priority, always available)
+        if include_bundled:
+            bundled = Path(__file__).parent / "bundled_skills"
+            if bundled.exists():
+                self._skill_paths.append(bundled)
+
+    def get_writable_paths(self) -> list[Path]:
+        """Return paths where new skills can be created.
+
+        Returns only user-provided paths, not bundled skills directory.
+        """
+        return self._writable_paths.copy()
 
     def _discover_skills(self) -> dict[str, Path]:
-        """Discover all available skills, with local overriding repo skills.
+        """Discover all available skills, with earlier paths taking priority.
 
         Returns:
             Dict mapping skill name to its directory path.
         """
         skills: dict[str, Path] = {}
 
-        # Process in reverse order so local (first in list) overrides repo
+        # Process in reverse order so earlier paths (higher priority) override
         for skills_dir in reversed(self._skill_paths):
             if not skills_dir.exists():
                 continue

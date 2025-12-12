@@ -213,15 +213,17 @@ wheels = [
 
 [[package]]
 name = "devskills"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
+    { name = "click" },
     { name = "mcp" },
     { name = "pyyaml" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "click", specifier = ">=8.0.0" },
     { name = "mcp", specifier = ">=1.23.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
 ]

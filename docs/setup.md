@@ -2,17 +2,53 @@
 
 This guide covers how to configure devskills with different AI coding agents.
 
+## Prerequisites
+
+- [uv](https://docs.astral.sh/uv/) - Fast Python package manager (for `uvx` command)
+
 ## Claude Code
 
-Add the devskills MCP server to Claude Code:
+### Quick Setup
 
-```bash
-claude mcp add devskills \
-  --transport stdio \
-  -- uv run --directory /path/to/devskills python -m server
+Add to your project's `.claude/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "devskills": {
+      "command": "uvx",
+      "args": ["devskills"]
+    }
+  }
+}
 ```
 
-Replace `/path/to/devskills` with the actual path to your cloned repo.
+### With Custom Skills
+
+Point to your team's skills directory:
+
+```json
+{
+  "mcpServers": {
+    "devskills": {
+      "command": "uvx",
+      "args": ["devskills", "--skills-path", "./skills"]
+    }
+  }
+}
+```
+
+### Global Setup (CLI)
+
+```bash
+claude mcp add devskills -- uvx devskills
+```
+
+Or with custom skills:
+
+```bash
+claude mcp add devskills -- uvx devskills --skills-path ~/my-skills
+```
 
 ### Verify Installation
 
@@ -53,21 +89,33 @@ Check server status in Claude Code:
 
 ### Configuration
 
-Create or edit `.vscode/mcp.json` in your project or user settings:
+Create or edit `.vscode/mcp.json` in your project:
 
 ```json
 {
   "servers": {
     "devskills": {
       "type": "stdio",
-      "command": "uv",
-      "args": ["run", "--directory", "/path/to/devskills", "python", "-m", "server"]
+      "command": "uvx",
+      "args": ["devskills"]
     }
   }
 }
 ```
 
-Replace `/path/to/devskills` with your actual path.
+With custom skills:
+
+```json
+{
+  "servers": {
+    "devskills": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["devskills", "--skills-path", "./skills"]
+    }
+  }
+}
+```
 
 ### Verify Installation
 
@@ -91,14 +139,25 @@ Create or edit `.cursor/mcp.json` in your home directory (global) or project roo
 {
   "mcpServers": {
     "devskills": {
-      "command": "uv",
-      "args": ["run", "--directory", "/path/to/devskills", "python", "-m", "server"]
+      "command": "uvx",
+      "args": ["devskills"]
     }
   }
 }
 ```
 
-Replace `/path/to/devskills` with your actual path.
+With custom skills:
+
+```json
+{
+  "mcpServers": {
+    "devskills": {
+      "command": "uvx",
+      "args": ["devskills", "--skills-path", "./skills"]
+    }
+  }
+}
+```
 
 ### Verify Installation
 
@@ -112,4 +171,43 @@ In Cursor's agent mode, ask it to use skills:
 
 ```
 List available skills from devskills and use code-review for this PR.
+```
+
+## Multiple Skill Sources
+
+You can combine multiple skill directories:
+
+```json
+{
+  "mcpServers": {
+    "devskills": {
+      "command": "uvx",
+      "args": [
+        "devskills",
+        "--skills-path", "./skills",
+        "--skills-path", "~/shared-company-skills"
+      ]
+    }
+  }
+}
+```
+
+Skills from earlier paths take priority when names conflict.
+
+## Environment Variables
+
+As an alternative to CLI arguments, you can use environment variables:
+
+```json
+{
+  "mcpServers": {
+    "devskills": {
+      "command": "uvx",
+      "args": ["devskills"],
+      "env": {
+        "DEVSKILLS_SKILLS_PATH": "./skills:~/shared-skills"
+      }
+    }
+  }
+}
 ```
