@@ -6,23 +6,17 @@ This guide covers how to configure devskills with different AI coding agents.
 
 - [uv](https://docs.astral.sh/uv/) - Fast Python package manager (for `uvx` command)
 
-## Recommended: Use `devskills init`
+## Create a Skills Repository
 
-The easiest way to set up devskills is to initialize a team skills repository:
+Initialize a team skills repository:
 
 ```bash
 uvx devskills init my-team-skills
 ```
 
-This creates pre-configured MCP settings for all agents with `--skills-path ./skills` already included.
+Then configure your MCP client to point to it (see agent-specific instructions below).
 
----
-
-## Manual Configuration
-
-If you prefer to configure manually, see the agent-specific instructions below.
-
-> **Important:** Always include `--skills-path ./skills` to use your custom skills. Without it, only bundled skills are available.
+> **Important:** Always include `--skills-path ./path/to/skills` to use your custom skills. Without it, only bundled skills are available.
 
 ## Claude Code
 

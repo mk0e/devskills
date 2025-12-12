@@ -8,45 +8,25 @@ from .main import create_server
 
 
 # Template content for init command
-CLAUDE_MCP_JSON = """{
-  "mcpServers": {
-    "devskills": {
-      "command": "uvx",
-      "args": ["devskills", "--skills-path", "./skills"]
-    }
-  }
-}
-"""
-
-VSCODE_MCP_JSON = """{
-  "servers": {
-    "devskills": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": ["devskills", "--skills-path", "./skills"]
-    }
-  }
-}
-"""
-
-CURSOR_MCP_JSON = """{
-  "mcpServers": {
-    "devskills": {
-      "command": "uvx",
-      "args": ["devskills", "--skills-path", "./skills"]
-    }
-  }
-}
-"""
-
 README_TEMPLATE = """# {name}
 
-Custom devskills for your team.
+Team skills repository for AI coding agents.
 
 ## Setup
 
 1. Clone this repository
-2. Your AI agent will automatically connect to devskills via the MCP configs
+2. Configure your MCP client to point to this checkout:
+
+```json
+{{
+  "mcpServers": {{
+    "devskills": {{
+      "command": "uvx",
+      "args": ["devskills", "--skills-path", "/path/to/this/repo/skills"]
+    }}
+  }}
+}}
+```
 
 ## Creating Skills
 
@@ -65,13 +45,6 @@ uvx devskills init-skill my-skill --path ./skills
 | Skill | Description |
 |-------|-------------|
 | (add your skills here) | |
-
-## Configuration
-
-MCP configs are provided for:
-- Claude Code (`.claude/mcp.json`)
-- GitHub Copilot (`.vscode/mcp.json`)
-- Cursor (`.cursor/mcp.json`)
 """
 
 GITKEEP = "# Add your skills here\n"
@@ -135,7 +108,7 @@ def main(ctx: click.Context, skills_path: tuple[Path, ...], no_bundled: bool) ->
 def init(path: Path, name: str | None, force: bool) -> None:
     """Initialize a team skills repository.
 
-    Creates the directory structure and MCP configs for a new skills repo.
+    Creates the directory structure for a new skills repo.
 
     \b
     Example:
@@ -163,26 +136,6 @@ def init(path: Path, name: str | None, force: bool) -> None:
     gitkeep_path = skills_dir / ".gitkeep"
     if not gitkeep_path.exists() or force:
         gitkeep_path.write_text(GITKEEP)
-
-    # Create MCP config directories and files
-    configs = [
-        (".claude", "mcp.json", CLAUDE_MCP_JSON),
-        (".vscode", "mcp.json", VSCODE_MCP_JSON),
-        (".cursor", "mcp.json", CURSOR_MCP_JSON),
-    ]
-
-    for dir_name, file_name, content in configs:
-        config_dir = path / dir_name
-        config_file = config_dir / file_name
-
-        if not config_dir.exists():
-            config_dir.mkdir()
-
-        if not config_file.exists() or force:
-            config_file.write_text(content)
-            click.echo(f"Created: {dir_name}/{file_name}")
-        else:
-            click.echo(f"Skipped: {dir_name}/{file_name} (already exists)")
 
     # Create README
     readme_path = path / "README.md"

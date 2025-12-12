@@ -1,23 +1,81 @@
 # DevSkills
 
-Reusable AI coding agent skills, exposed via MCP. Define workflows once, use across Claude Code, Cursor, GitHub Copilot, and other MCP-compatible tools.
+An MCP server that brings [Anthropic's Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) to any MCP-compatible coding agent.
 
-## Why Skills?
+**What this enables:** Your team creates a shared repository of skills — development workflows, code reviews,debugging, etc.— and every team member's AI agent (Claude Code, Cursor, Copilot) can use them automatically.
 
-AI coding agents are powerful but generic. They don't know your team's conventions, deployment processes, or domain-specific patterns. Every time you ask for help, you repeat the same context.
+- [What are Skills?](#what-are-skills)
+- [The Problem](#the-problem)
+- [How DevSkills Works](#how-devskills-works)
+- [Quick Start](#quick-start)
+- [Creating Skills](#creating-skills)
+- [Documentation](#documentation)
 
-**Skills solve this by packaging reusable knowledge:**
 
-- **Consistency** - The same workflow runs the same way every time, across any MCP-compatible agent
-- **Efficiency** - Stop re-explaining your PR review checklist, deployment steps, or coding standards
-- **Shareability** - Create once, use across your team and tools
-- **Progressive loading** - Only load what's needed: metadata first, then instructions, then scripts/references
+## What are Skills?
+
+Skills are Anthropic's concept for giving AI agents specialized knowledge. Instead of repeating context every conversation, you package instructions, scripts, and references into a folder that agents load on-demand.
+
+Think of skills like onboarding docs for a new hire: "Here's how we do deployments. Here's our code review checklist. Here's the security patterns we follow." Except the new hire is an AI agent.
+
+The key design principle is **progressive disclosure** — agents see only skill names and descriptions upfront, then load full instructions only when relevant. This means you can have dozens of skills without bloating context.
+
+## The Problem
+
+Native Skills support exists only in Claude Code, where skills live in `~/.claude/skills/` or `.claude/skills/`.
+
+Teams using Cursor, GitHub Copilot, or other AI coding tools can't use Skills and can't share a common skill repository across different tools and maybe even agents running on the server side.
+
+## How DevSkills Works
+
+DevSkills runs as an MCP server that exposes your skills to any MCP-compatible agent:
+
+```
+┌─────────────────────────────────────────┐
+│     devskills (MCP Server)              │
+│  ├── bundled_skills/  (defaults)        │
+│  └── your skills via --skills-path      │
+└─────────────────────────────────────────┘
+                    │
+                    │ MCP Protocol
+                    ▼
+┌─────────────────────────────────────────┐
+│     AI Coding Agents                    │
+│  Claude Code, Cursor, GitHub Copilot    │
+└─────────────────────────────────────────┘
+```
+
+**How agents use skills:**
+
+1. **Discovery** — Agent calls `list_skills()`, sees names and descriptions
+2. **Selection** — Agent decides which skill matches the user's request
+3. **Loading** — Agent calls `get_skill(name)` to load full instructions
+4. **Execution** — Agent follows the instructions, optionally fetching scripts or references
+
+This mirrors Anthropic's progressive disclosure: metadata first, full content only when needed.
+
+**Team workflow:**
+
+1. Team creates a skills repository (manually or via `devskills init`)
+2. Each developer clones the repo locally
+3. Each developer configures their MCP client to point to the local checkout:
+
+```json
+{
+  "mcpServers": {
+    "devskills": {
+      "command": "uvx",
+      "args": ["devskills", "--skills-path", "/path/to/team-skills"]
+    }
+  }
+}
+```
+
+Same skills, any agent.
 
 ## Quick Start
 
-### For Teams (Recommended)
-
-Initialize a team skills repository with pre-configured MCP settings:
+### 1. Create a Skills Repository
 
 ```bash
 uvx devskills init my-team-skills
@@ -25,179 +83,42 @@ cd my-team-skills
 git init && git add . && git commit -m "Initial commit"
 ```
 
-This creates:
-```
-my-team-skills/
-├── skills/                  # Your custom skills go here
-├── .claude/mcp.json         # Pre-configured for Claude Code
-├── .vscode/mcp.json         # Pre-configured for GitHub Copilot
-├── .cursor/mcp.json         # Pre-configured for Cursor
-├── .gitignore
-└── README.md
-```
+### 2. Configure Your MCP Client
 
-The generated MCP configs already include `--skills-path ./skills`:
+Add devskills to your agent's MCP config, pointing to your skills:
+
 ```json
 {
   "mcpServers": {
     "devskills": {
       "command": "uvx",
-      "args": ["devskills", "--skills-path", "./skills"]
+      "args": ["devskills", "--skills-path", "/path/to/my-team-skills/skills"]
     }
   }
 }
 ```
 
-Create your first skill:
-```bash
-uvx devskills init-skill code-review --path ./skills
-```
-
-Team members clone the repo, and their agents automatically get access to team skills plus bundled defaults.
-
-### Manual Setup
-
-If you want to add devskills to an existing project manually:
-
-**Claude Code** (`.claude/mcp.json`):
-```json
-{
-  "mcpServers": {
-    "devskills": {
-      "command": "uvx",
-      "args": ["devskills", "--skills-path", "./skills"]
-    }
-  }
-}
-```
-
-**GitHub Copilot** (`.vscode/mcp.json`):
-```json
-{
-  "servers": {
-    "devskills": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": ["devskills", "--skills-path", "./skills"]
-    }
-  }
-}
-```
-
-**Cursor** (`.cursor/mcp.json`):
-```json
-{
-  "mcpServers": {
-    "devskills": {
-      "command": "uvx",
-      "args": ["devskills", "--skills-path", "./skills"]
-    }
-  }
-}
-```
-
-> **Note:** Without `--skills-path`, only bundled skills are available. Add `--skills-path ./skills` to include your custom skills.
-
-## How It Works
-
-```
-┌─────────────────────────────────────────┐
-│     devskills (PyPI package)            │
-│  ├── bundled_skills/                    │
-│  │   ├── example/                       │
-│  │   ├── skill-creator/                 │
-│  │   └── mcp-builder/                   │
-│  └── MCP server                         │
-└─────────────────────────────────────────┘
-           │
-           │  --skills-path ./skills
-           ▼
-┌─────────────────────────────────────────┐
-│     Your Team's Skills Repo             │
-│  └── skills/                            │
-│      ├── code-review/                   │
-│      ├── deployment/                    │
-│      └── ...                            │
-└─────────────────────────────────────────┘
-           │
-           ▼
-┌─────────────────────────────────────────┐
-│     AI Agents (via MCP)                 │
-│  Claude Code, Cursor, GitHub Copilot    │
-└─────────────────────────────────────────┘
-```
-
-## CLI Usage
-
-```bash
-# Run MCP server (default)
-uvx devskills
-uvx devskills --skills-path ./skills
-uvx devskills --skills-path ./skills --no-bundled
-
-# Initialize a team skills repository
-uvx devskills init my-team-skills
-uvx devskills init ./path -n "My Team"
-
-# Create a new skill from template
-uvx devskills init-skill code-review
-uvx devskills init-skill deployment --path ./skills
-
-# Show version
-uvx devskills --version
-```
-
-## MCP Tools
-
-The server exposes five tools:
-
-| Tool | Description |
-|------|-------------|
-| `list_skills()` | Lists all available skills with name and description |
-| `get_skill(name)` | Retrieves full SKILL.md content for a skill |
-| `get_script(skill, filename)` | Gets a script from a skill's `scripts/` folder |
-| `get_reference(skill, filename)` | Gets a reference doc from a skill's `references/` folder |
-| `get_skill_paths()` | Returns configured skill directories (for creating new skills) |
+See [Setup Guide](docs/setup.md) for agent-specific configuration (Claude Code, Cursor, GitHub Copilot).
 
 ## Creating Skills
 
-Use the built-in `skill-creator` skill:
+The recommended way to create a skill is using the built-in `skill-creator`:
+
 ```
 I want to create a new skill for code review. Use devskills.
 ```
 
-See [Creating Skills](docs/creating-skills.md) for the full guide.
+This guides you through creating a skill with the correct structure.
 
-## Bundled Skills
+See [Creating Skills](docs/creating-skills.md) for the full guide, including skill structure and SKILL.md format.
 
-| Skill | Description |
-|-------|-------------|
-| `example` | Test skill to verify devskills is working |
-| `skill-creator` | Guides you through creating new skills |
-| `mcp-builder` | Best practices for building MCP servers |
+## Documentation
 
-## Environment Variables
+- [Setup Guide](docs/setup.md) — Agent-specific MCP configuration
+- [Creating Skills](docs/creating-skills.md) — Skill structure and format
+- [Reference](docs/reference.md) — CLI, MCP tools, bundled skills
+- [Contributing](CONTRIBUTING.md) — Development setup
 
-| Variable | Description |
-|----------|-------------|
-| `DEVSKILLS_SKILLS_PATH` | Colon-separated list of skill directories |
-| `DEVSKILLS_LOCAL_SKILLS` | (Deprecated) Use `DEVSKILLS_SKILLS_PATH` instead |
-
-## Development
-
-```bash
-# Clone and install
-git clone https://github.com/kontext-e/devskills.git
-cd devskills
-uv sync
-
-# Run locally
-uv run devskills --skills-path ./test-skills
-
-# Run tests
-uv run pytest
-```
-
-## License
-
-MIT
+**Anthropic Resources:**
+- [Agent Skills Blog Post](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills)
+- [Skills Cookbook](https://github.com/anthropics/claude-cookbooks/tree/main/skills)

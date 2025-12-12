@@ -10,67 +10,46 @@ Teams can create their own skills repositories that work alongside the bundled d
 
 ### 1. Create Your Repository
 
+Using the CLI:
 ```bash
-mkdir my-team-skills
+uvx devskills init my-team-skills
+cd my-team-skills
+git init && git add . && git commit -m "Initial commit"
+```
+
+Or manually:
+```bash
+mkdir -p my-team-skills/skills
 cd my-team-skills
 git init
 ```
 
-### 2. Create Directory Structure
-
+This creates:
 ```
 my-team-skills/
-├── skills/                    # Your team's skills
-│   └── .gitkeep
-├── .claude/
-│   └── mcp.json              # Claude Code config
-├── .vscode/
-│   └── mcp.json              # GitHub Copilot config
-├── .cursor/
-│   └── mcp.json              # Cursor config
+├── skills/           # Your team's skills
+├── .gitignore
 └── README.md
 ```
 
-### 3. Add MCP Configs
+### 2. Configure Your MCP Client
 
-**.claude/mcp.json:**
+Each team member configures their MCP client to point to their local checkout:
+
 ```json
 {
   "mcpServers": {
     "devskills": {
       "command": "uvx",
-      "args": ["devskills", "--skills-path", "./skills"]
+      "args": ["devskills", "--skills-path", "/path/to/my-team-skills/skills"]
     }
   }
 }
 ```
 
-**.vscode/mcp.json:**
-```json
-{
-  "servers": {
-    "devskills": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": ["devskills", "--skills-path", "./skills"]
-    }
-  }
-}
-```
+See [setup.md](setup.md) for agent-specific config file locations.
 
-**.cursor/mcp.json:**
-```json
-{
-  "mcpServers": {
-    "devskills": {
-      "command": "uvx",
-      "args": ["devskills", "--skills-path", "./skills"]
-    }
-  }
-}
-```
-
-### 4. Create a README
+### 3. Create a README
 
 ```markdown
 # My Team Skills
@@ -117,8 +96,8 @@ git push origin main
 
 Team members:
 1. Clone the team skills repo
-2. Open projects in their preferred agent (Claude Code, Cursor, Copilot)
-3. The MCP config automatically points to `./skills`
+2. Configure their MCP client to point to the local checkout
+3. Open projects in their preferred agent (Claude Code, Cursor, Copilot)
 4. Both team skills and bundled defaults are available
 
 ## Skill Priority
