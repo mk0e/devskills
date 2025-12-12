@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `devskills init` command to initialize team skills repositories
+- `devskills init-skill` command to create skills from template
 - CLI with `--skills-path` option for specifying custom skill directories
 - `--no-bundled` flag to disable bundled default skills
 - `get_skill_paths()` MCP tool to query configured skill directories

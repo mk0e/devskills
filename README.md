@@ -63,29 +63,28 @@ I want to create a new skill. Use devskills.
 
 ### For Teams (Custom Skills)
 
-Create a repository for your team's skills and point devskills to it:
+Initialize a new team skills repository:
 
+```bash
+uvx devskills init my-team-skills
+cd my-team-skills
+git init && git add . && git commit -m "Initial commit"
 ```
-team-skills/
+
+This creates:
+```
+my-team-skills/
 ├── skills/
-│   └── code-review/
-│       ├── SKILL.md
-│       ├── scripts/
-│       └── references/
 ├── .claude/mcp.json
+├── .vscode/mcp.json
+├── .cursor/mcp.json
+├── .gitignore
 └── README.md
 ```
 
-**MCP config** (`.claude/mcp.json`):
-```json
-{
-  "mcpServers": {
-    "devskills": {
-      "command": "uvx",
-      "args": ["devskills", "--skills-path", "./skills"]
-    }
-  }
-}
+Then create your first skill:
+```bash
+uvx devskills init-skill code-review --path ./skills
 ```
 
 Team members clone the repo, and their agents automatically get access to team skills plus bundled defaults.
@@ -122,17 +121,18 @@ Team members clone the repo, and their agents automatically get access to team s
 ## CLI Usage
 
 ```bash
-# Run with default bundled skills only
+# Run MCP server (default)
 uvx devskills
-
-# Add custom skills directory
 uvx devskills --skills-path ./skills
-
-# Multiple skill sources
-uvx devskills --skills-path ./skills --skills-path ~/shared-skills
-
-# Disable bundled skills (use only custom)
 uvx devskills --skills-path ./skills --no-bundled
+
+# Initialize a team skills repository
+uvx devskills init my-team-skills
+uvx devskills init ./path -n "My Team"
+
+# Create a new skill from template
+uvx devskills init-skill code-review
+uvx devskills init-skill deployment --path ./skills
 
 # Show version
 uvx devskills --version
