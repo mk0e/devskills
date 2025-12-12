@@ -11,5 +11,5 @@ Initial release.
 - MCP server exposing skills as tools for AI coding agents
 - CLI with `devskills init` and `devskills init-skill` commands
 - Support for custom skill directories via `--skills-path`
-- Three bundled skills: `example`, `skill-creator`, `mcp-builder`
+- Three bundled skills: `skill-creator`, `mcp-builder`
 - Works with Claude Code, GitHub Copilot, and Cursor
