@@ -1,5 +1,7 @@
 # DevSkills
 
+[![PyPI](https://img.shields.io/pypi/v/devskills)](https://pypi.org/project/devskills/)
+
 An MCP server that brings [Anthropic's Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) to any MCP-compatible coding agent.
 
 **What this enables:** Your team creates a shared repository of skills — development workflows, code reviews,debugging, etc.— and every team member's AI agent (Claude Code, Cursor, Copilot) can use them automatically.
