@@ -150,10 +150,6 @@ The server exposes five tools:
 | `get_reference(skill, filename)` | Gets a reference doc from a skill's `references/` folder |
 | `get_skill_paths()` | Returns configured skill directories (for creating new skills) |
 
-## MCP Resources
-
-Root-level reference documents in `references/` are exposed as MCP resources via `references://{filename}`.
-
 ## Creating Skills
 
 Use the built-in `skill-creator` skill:
