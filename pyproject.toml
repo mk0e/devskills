@@ -1,6 +1,6 @@
 [project]
 name = "devskills"
-version = "0.2.0"
+version = "0.1.0"
 description = "MCP server exposing reusable skills for AI coding agents"
 readme = "README.md"
 license = "MIT"
