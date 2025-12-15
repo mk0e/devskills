@@ -4,12 +4,13 @@
 
 An MCP server that brings [Anthropic's Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) to any MCP-compatible coding agent.
 
-**What this enables:** Your team creates a shared repository of skills — development workflows, code reviews,debugging, etc.— and every team member's AI agent (Claude Code, Cursor, Copilot) can use them automatically.
+**What this enables:** Your team creates a shared repository of skills — a skill that reviews PRs with your team's checklist, a skill that scaffolds services following your architecture patterns, a skill that debugs test failures with your stack's quirks in mind — and every team member's AI agent can use them automatically.
 
 - [What are Skills?](#what-are-skills)
 - [The Problem](#the-problem)
 - [How DevSkills Works](#how-devskills-works)
 - [Quick Start](#quick-start)
+- [Usage](#usage)
 - [Creating Skills](#creating-skills)
 - [Documentation](#documentation)
 
@@ -58,22 +59,9 @@ This mirrors Anthropic's progressive disclosure: metadata first, full content on
 
 **Team workflow:**
 
-1. Team creates a skills repository (manually or via `devskills init`)
-2. Each developer clones the repo locally
-3. Each developer configures their MCP client to point to the local checkout:
-
-```json
-{
-  "mcpServers": {
-    "devskills": {
-      "command": "uvx",
-      "args": ["devskills", "--skills-path", "/path/to/team-skills"]
-    }
-  }
-}
-```
-
-Same skills, any agent.
+1. Team creates a skills repository (via `devskills init`)
+2. Each developer clones the repo and configures their MCP client to point to it
+3. Same skills, any agent
 
 ## Quick Start
 
@@ -87,20 +75,25 @@ git init && git add . && git commit -m "Initial commit"
 
 ### 2. Configure Your MCP Client
 
-Add devskills to your agent's MCP config, pointing to your skills:
+See [Setup Guide](docs/setup.md) for agent-specific configuration (Claude Code, Cursor, GitHub Copilot).
 
-```json
-{
-  "mcpServers": {
-    "devskills": {
-      "command": "uvx",
-      "args": ["devskills", "--skills-path", "/path/to/my-team-skills/skills"]
-    }
-  }
-}
+## Usage
+
+Once configured, trigger skills by asking your agent:
+
+```
+Review this PR. Use devskills.
 ```
 
-See [Setup Guide](docs/setup.md) for agent-specific configuration (Claude Code, Cursor, GitHub Copilot).
+```
+Set up a new API endpoint for user management. Use devskills.
+```
+
+```
+Debug why these tests are failing. Use devskills.
+```
+
+The agent will call `list_skills()` to discover available skills, pick the relevant one, and follow its instructions.
 
 ## Creating Skills
 

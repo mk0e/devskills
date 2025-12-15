@@ -2,7 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.0] - 2025-01-XX
+## [0.1.2] - 2025-12-12
+
+### Fixed
+
+- Add missing `Path` import in main.py
+
+### Docs
+
+- Improve README with concrete skill examples and usage section
+- Add PyPI badge to README
+
+## [0.1.1] - 2025-12-12
+
+### Fixed
+
+- Fix GitHub URLs in package metadata
+
+## [0.1.0] - 2025-12-12
 
 Initial release.
 
