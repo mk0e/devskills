@@ -137,6 +137,17 @@ def init(path: Path, name: str | None, force: bool) -> None:
     if not gitkeep_path.exists() or force:
         gitkeep_path.write_text(GITKEEP)
 
+    # Create prompts directory
+    prompts_dir = path / "prompts"
+    if not prompts_dir.exists():
+        prompts_dir.mkdir()
+        click.echo(f"Created: prompts/")
+
+    # Create .gitkeep in prompts
+    prompts_gitkeep_path = prompts_dir / ".gitkeep"
+    if not prompts_gitkeep_path.exists() or force:
+        prompts_gitkeep_path.write_text("# Add your prompts here\n")
+
     # Create README
     readme_path = path / "README.md"
     if not readme_path.exists() or force:

@@ -22,6 +22,12 @@ dependencies = [
     "click>=8.0.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+]
+
 [project.scripts]
 devskills = "devskills.cli:main"
 

@@ -1,10 +1,12 @@
-"""MCP server for devskills - exposes skills as tools."""
+"""MCP server for devskills - exposes skills as tools and prompts."""
 
 from pathlib import Path
 from mcp.server.fastmcp import FastMCP
+from mcp.types import PromptMessage, TextContent
 from pydantic import BaseModel, Field
 
 from .skills import SkillManager
+from .prompts import PromptManager
 
 
 # Pydantic input models for validation
@@ -51,6 +53,7 @@ class GetReferenceInput(BaseModel):
 # Global instances (set by create_server or run)
 mcp: FastMCP | None = None
 skills: SkillManager | None = None
+prompts: PromptManager | None = None
 
 
 def create_server(
@@ -61,15 +64,16 @@ def create_server(
 
     Args:
         extra_paths: Additional skill directories to include.
-        include_bundled: Whether to include bundled default skills.
+        include_bundled: Whether to include bundled default skills and prompts.
 
     Returns:
         Configured FastMCP server instance.
     """
-    global mcp, skills
+    global mcp, skills, prompts
 
     mcp = FastMCP("devskills")
     skills = SkillManager(extra_paths=extra_paths, include_bundled=include_bundled)
+    prompts = PromptManager(extra_paths=extra_paths, include_bundled=include_bundled)
 
     # Register tools
     @mcp.tool(
@@ -180,7 +184,33 @@ def create_server(
         """
         return [str(p) for p in skills.get_writable_paths()]
 
+    # Register prompts
+    for prompt_info in prompts.list_all():
+        _register_prompt(mcp, prompts, prompt_info)
+
     return mcp
+
+
+def _register_prompt(mcp: FastMCP, prompt_manager: PromptManager, prompt_info: dict):
+    """Register a single prompt with the MCP server.
+
+    Args:
+        mcp: FastMCP server instance.
+        prompt_manager: PromptManager to retrieve prompt body.
+        prompt_info: Dict with 'name' and 'description' keys.
+    """
+    prompt_name = prompt_info["name"]
+    prompt_desc = prompt_info["description"]
+
+    @mcp.prompt(name=prompt_name, description=prompt_desc)
+    async def handler() -> list[PromptMessage]:
+        body = prompt_manager.get_body(prompt_name)
+        return [
+            PromptMessage(
+                role="user",
+                content=TextContent(type="text", text=body),
+            )
+        ]
 
 
 def run():
