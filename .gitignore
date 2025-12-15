@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 plan
 project-idea.md
+.DS_Store
