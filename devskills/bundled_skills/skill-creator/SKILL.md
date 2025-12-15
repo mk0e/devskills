@@ -123,7 +123,8 @@ When the user chooses AWS, the agent only reads aws.md.
 2. Plan reusable contents (scripts, references)
 3. Create the skill directory
 4. Write SKILL.md and implement resources
-5. Test and iterate
+5. Create a prompt (optional)
+6. Test and iterate
 
 ### Step 1: Understanding the Skill
 
@@ -183,7 +184,40 @@ description: Comprehensive document creation, editing, and analysis. Use when wo
 
 Write instructions for using the skill and its bundled resources. Use imperative form.
 
-### Step 5: Test and Iterate
+### Step 5: Create a Prompt (Optional)
+
+Ask the user: **"Should this skill also be available as a user-triggered prompt?"**
+
+Prompts are user-triggered entry points (slash commands) that explicitly invoke a skill. Not every skill needs a prompt—only user-facing workflows benefit from one.
+
+If yes, create a prompt file in the `prompts/` directory (sibling to `skills/`):
+
+```
+my-team-skills/
+├── skills/
+│   └── my-skill/
+│       └── SKILL.md
+└── prompts/
+    └── my-skill.md    ← Create this file
+```
+
+Prompt file format:
+
+```markdown
+---
+name: my-skill
+description: [Short description for prompt listings]
+---
+
+I need help with [task]. Use devskills to get the my-skill skill and follow its instructions exactly.
+```
+
+The prompt body should:
+- Describe the user's intent in first person
+- Mention "use devskills" so the agent knows to use devskills tools
+- Reference the skill name to fetch
+
+### Step 6: Test and Iterate
 
 1. Use the skill on real tasks
 2. Notice struggles or inefficiencies

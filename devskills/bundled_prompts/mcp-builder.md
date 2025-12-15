@@ -3,4 +3,4 @@ name: mcp-builder
 description: Build a high-quality MCP server with guided workflow
 ---
 
-Use the mcp-builder skill exactly as written.
+I need help building an MCP server. Use devskills to get the mcp-builder skill and follow its instructions exactly.
