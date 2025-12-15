@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "devskills": {
-      "command": "uvx",
-      "args": ["devskills", "--skills-path", "./.skills"]
+      "command": "uv",
+      "args": ["run", "devskills", "--skills-path", "./.skills"]
     }
   }
 }
