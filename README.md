@@ -37,25 +37,41 @@ DevSkills runs as an MCP server that exposes your skills to any MCP-compatible a
 ┌─────────────────────────────────────────┐
 │     devskills (MCP Server)              │
 │  ├── bundled_skills/  (defaults)        │
-│  └── your skills via --skills-path      │
+│  ├── bundled_prompts/ (defaults)        │
+│  └── your skills/prompts via --skills-path
 └─────────────────────────────────────────┘
-                    │
-                    │ MCP Protocol
-                    ▼
+          │                    │
+          │ MCP Tools          │ MCP Prompts
+          │ (model-triggered)  │ (user-triggered)
+          ▼                    ▼
 ┌─────────────────────────────────────────┐
 │     AI Coding Agents                    │
 │  Claude Code, Cursor, GitHub Copilot    │
 └─────────────────────────────────────────┘
 ```
 
-**How agents use skills:**
+**Two ways to invoke skills:**
+
+| Mechanism | Trigger | How it works |
+|-----------|---------|--------------|
+| **MCP Tools** | Model decides | Agent calls `list_skills()` → picks relevant skill → loads instructions |
+| **MCP Prompts** | User invokes | User triggers `/mcp-builder` → agent receives prompt → follows skill |
+
+**Tool-triggered flow (automatic):**
 
 1. **Discovery** — Agent calls `list_skills()`, sees names and descriptions
 2. **Selection** — Agent decides which skill matches the user's request
 3. **Loading** — Agent calls `get_skill(name)` to load full instructions
 4. **Execution** — Agent follows the instructions, optionally fetching scripts or references
 
-This mirrors Anthropic's progressive disclosure: metadata first, full content only when needed.
+**Prompt-triggered flow (explicit):**
+
+1. **User invokes** — User triggers a prompt (e.g., `/skill-creator` in Claude Code)
+2. **Agent receives** — Prompt tells agent to use devskills and which skill to load
+3. **Loading** — Agent calls `get_skill(name)` as directed
+4. **Execution** — Agent follows the instructions
+
+Both flows converge at the same skill instructions—prompts just provide an explicit entry point.
 
 **Team workflow:**
 
@@ -79,7 +95,9 @@ See [Setup Guide](docs/setup.md) for agent-specific configuration (Claude Code, 
 
 ## Usage
 
-Once configured, trigger skills by asking your agent:
+**Option 1: Let the agent decide (tools)**
+
+Ask your agent naturally, mentioning "use devskills":
 
 ```
 Review this PR. Use devskills.
@@ -89,11 +107,21 @@ Review this PR. Use devskills.
 Set up a new API endpoint for user management. Use devskills.
 ```
 
+The agent will call `list_skills()` to discover available skills, pick the relevant one, and follow its instructions.
+
+**Option 2: Explicitly invoke a skill (prompts)**
+
+Use slash commands to trigger specific skills directly:
+
 ```
-Debug why these tests are failing. Use devskills.
+/skill-creator
 ```
 
-The agent will call `list_skills()` to discover available skills, pick the relevant one, and follow its instructions.
+```
+/mcp-builder
+```
+
+The prompt tells the agent exactly which skill to use—no discovery step needed.
 
 ## Creating Skills
 
