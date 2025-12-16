@@ -1,0 +1,60 @@
+{
+	"name": "devskills",
+	"version": "0.1.0",
+	"description": "MCP server exposing reusable skills for AI coding agents",
+	"type": "module",
+	"packageManager": "pnpm@9.15.0",
+	"main": "dist/index.js",
+	"bin": {
+		"devskills": "dist/cli.js"
+	},
+	"scripts": {
+		"preinstall": "npx only-allow pnpm",
+		"build": "tsc",
+		"start": "node dist/cli.js",
+		"dev": "tsx watch src/cli.ts",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"lint": "biome lint .",
+		"lint:fix": "biome lint --write .",
+		"format": "biome format --write .",
+		"check": "biome check --write .",
+		"init:repo": "node dist/cli.js init",
+		"init:skill": "node dist/cli.js init-skill",
+		"validate": "node dist/cli.js validate-skill"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"keywords": [
+		"mcp",
+		"model-context-protocol",
+		"ai",
+		"skills",
+		"claude",
+		"cursor",
+		"copilot"
+	],
+	"author": "",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/mk0e/devskills"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.24.3",
+		"commander": "^14.0.2",
+		"dedent": "^1.7.0",
+		"js-yaml": "^4.1.0",
+		"zod": "^3.25.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.9",
+		"@types/dedent": "^0.7.2",
+		"@types/js-yaml": "^4.0.9",
+		"@types/node": "^22.10.0",
+		"tsx": "^4.19.2",
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.15"
+	}
+}
