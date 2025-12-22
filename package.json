@@ -21,7 +21,7 @@
 		"check": "biome check --write .",
 		"init:repo": "node dist/cli.js init",
 		"init:skill": "node dist/cli.js init-skill",
-		"validate": "node dist/cli.js validate-skill"
+		"validate": "node dist/cli.js validate"
 	},
 	"engines": {
 		"node": ">=18"

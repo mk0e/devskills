@@ -33,6 +33,15 @@ export interface ValidationResult {
 }
 
 /**
+ * Result of prompt validation.
+ */
+export interface PromptValidationResult {
+	valid: boolean;
+	errors: string[];
+	warnings: string[];
+}
+
+/**
  * Validate a skill directory.
  *
  * Checks:
@@ -222,5 +231,149 @@ export function validateSkill(skillPath: string): ValidationResult {
 	return {
 		valid: true,
 		message: "Skill is valid!",
+	};
+}
+
+/**
+ * Calculate Levenshtein distance between two strings.
+ */
+function levenshteinDistance(a: string, b: string): number {
+	const matrix: number[][] = [];
+
+	for (let i = 0; i <= b.length; i++) {
+		matrix[i] = [i];
+	}
+	for (let j = 0; j <= a.length; j++) {
+		matrix[0][j] = j;
+	}
+
+	for (let i = 1; i <= b.length; i++) {
+		for (let j = 1; j <= a.length; j++) {
+			if (b.charAt(i - 1) === a.charAt(j - 1)) {
+				matrix[i][j] = matrix[i - 1][j - 1];
+			} else {
+				matrix[i][j] = Math.min(
+					matrix[i - 1][j - 1] + 1,
+					matrix[i][j - 1] + 1,
+					matrix[i - 1][j] + 1,
+				);
+			}
+		}
+	}
+
+	return matrix[b.length][a.length];
+}
+
+/**
+ * Find similar variable name (for typo suggestions).
+ */
+function findSimilar(name: string, candidates: string[]): string | undefined {
+	for (const candidate of candidates) {
+		const distance = levenshteinDistance(name, candidate);
+		if (distance <= 2 && distance > 0) {
+			return candidate;
+		}
+	}
+	return undefined;
+}
+
+/**
+ * Validate a prompt file (strict mode for CLI).
+ *
+ * @param promptPath - Path to the prompt .md file.
+ * @returns Validation result with errors and warnings.
+ */
+export function validatePrompt(promptPath: string): PromptValidationResult {
+	const errors: string[] = [];
+	const warnings: string[] = [];
+
+	// Check file exists
+	if (!existsSync(promptPath)) {
+		return {
+			valid: false,
+			errors: [`Prompt file not found: ${promptPath}`],
+			warnings: [],
+		};
+	}
+
+	// Read content
+	let content: string;
+	try {
+		content = readFileSync(promptPath, "utf-8");
+	} catch (e) {
+		return {
+			valid: false,
+			errors: [`Error reading prompt: ${e instanceof Error ? e.message : String(e)}`],
+			warnings: [],
+		};
+	}
+
+	// Parse frontmatter
+	const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+	let frontmatter: Record<string, unknown> = {};
+	if (fmMatch) {
+		try {
+			frontmatter = (yaml.load(fmMatch[1]) as Record<string, unknown>) ?? {};
+		} catch {
+			// Invalid YAML handled below
+		}
+	}
+
+	// Extract body
+	const bodyMatch = content.match(/^---\n[\s\S]*?\n---\n?([\s\S]*)/);
+	const body = bodyMatch ? bodyMatch[1].trim() : content.trim();
+
+	// Parse arguments from frontmatter
+	const definedArgs = new Map<string, Record<string, unknown>>();
+	if (frontmatter.arguments && typeof frontmatter.arguments === "object") {
+		for (const [argName, argDef] of Object.entries(frontmatter.arguments as Record<string, unknown>)) {
+			const def = (argDef ?? {}) as Record<string, unknown>;
+			definedArgs.set(argName, def);
+
+			// Check type is valid
+			if (def.type !== undefined) {
+				const validTypes = ["string", "number", "boolean"];
+				if (!validTypes.includes(def.type as string)) {
+					errors.push(`Invalid type '${def.type}'. Use: ${validTypes.join(", ")}.`);
+				}
+			}
+
+			// Warning: missing description
+			if (!def.description) {
+				warnings.push(`Argument '${argName}' has no description.`);
+			}
+		}
+	}
+
+	// Extract variables from body
+	const bodyVars = new Set<string>();
+	for (const match of body.matchAll(/\{\{(\w+)\}\}/g)) {
+		bodyVars.add(match[1]);
+	}
+
+	// Check for undefined variables
+	const definedArgNames = [...definedArgs.keys()];
+	for (const varName of bodyVars) {
+		if (!definedArgs.has(varName)) {
+			const similar = findSimilar(varName, definedArgNames);
+			if (similar) {
+				errors.push(`Undefined variable '${varName}'. Did you mean '${similar}'?`);
+			} else {
+				errors.push(`Undefined variable '${varName}'. Add to arguments or fix typo.`);
+			}
+		}
+	}
+
+	// Warning: unused arguments
+	for (const argName of definedArgs.keys()) {
+		if (!bodyVars.has(argName)) {
+			warnings.push(`Argument '${argName}' defined but never used.`);
+		}
+	}
+
+	return {
+		valid: errors.length === 0,
+		errors,
+		warnings,
 	};
 }

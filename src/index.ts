@@ -10,6 +10,8 @@ import {
 	GetReferenceInputSchema,
 	GetScriptInputSchema,
 	GetSkillInputSchema,
+	GetSkillPathsOutputSchema,
+	ListSkillsOutputSchema,
 } from "./schemas.js";
 import { SkillManager } from "./skillManager.js";
 import { VERSION } from "./version.js";
@@ -51,6 +53,7 @@ export function createServer(
 				2. Follow the instructions in the skill
 			`,
 			inputSchema: {},
+			outputSchema: ListSkillsOutputSchema,
 			annotations: {
 				readOnlyHint: true,
 				destructiveHint: false,
@@ -73,9 +76,9 @@ export function createServer(
 		{
 			title: "Get Skill Instructions",
 			description: dedent`
-				Get the full instructions (SKILL.md content) for a skill.
+				Fetch complete instructions for executing a skill.
 
-				You MUST call devskills_list_skills() first to discover valid skill names.
+				Requires: Call devskills_list_skills() first to discover valid skill names.
 				Returns the complete skill instructions including:
 				- When to use the skill
 				- Step-by-step instructions to follow
@@ -120,7 +123,7 @@ export function createServer(
 		{
 			title: "Get Skill Script",
 			description: dedent`
-				Get a script file from a skill's scripts/ folder.
+				Fetch a script file from a skill's scripts/ folder.
 
 				Only call this when a skill's instructions explicitly reference a script.
 				The skill parameter must be a valid skill name from devskills_list_skills().
@@ -163,7 +166,7 @@ export function createServer(
 		{
 			title: "Get Skill Reference",
 			description: dedent`
-				Get a reference document from a skill's references/ folder.
+				Fetch a reference document from a skill's references/ folder.
 
 				Only call this when a skill's instructions explicitly reference a doc.
 				The skill parameter must be a valid skill name from devskills_list_skills().
@@ -206,7 +209,7 @@ export function createServer(
 		{
 			title: "Get Skill Paths",
 			description: dedent`
-				Get the configured skill directories where new skills can be created.
+				Return writable skill directories where new skills can be created.
 
 				Returns paths configured via --skills-path or DEVSKILLS_SKILLS_PATH.
 				Does NOT include the bundled skills directory (which is read-only).
@@ -215,6 +218,7 @@ export function createServer(
 				skill-creator skill.
 			`,
 			inputSchema: {},
+			outputSchema: GetSkillPathsOutputSchema,
 			annotations: {
 				readOnlyHint: true,
 				destructiveHint: false,
@@ -235,21 +239,45 @@ export function createServer(
 	for (const promptInfo of prompts.listAll()) {
 		const promptName = promptInfo.name;
 		const promptDesc = promptInfo.description;
+		const promptArgs = promptInfo.arguments;
+
+		// Build argsSchema if prompt has arguments
+		const argsSchema = promptArgs
+			? prompts.buildArgsSchema(promptName)
+			: undefined;
 
 		server.registerPrompt(
 			promptName,
 			{
 				title: promptName,
 				description: promptDesc,
-				argsSchema: {},
+				...(argsSchema ? { argsSchema } : {}),
 			},
-			() => {
-				const body = prompts.getBody(promptName);
+			(request) => {
+				// Note: MCP SDK handles schema validation and defaults automatically
+				// We receive the already-validated args in the request
+				const args = request.arguments ?? {};
+				const body =
+					Object.keys(args).length > 0
+						? prompts.getBodyWithArgs(promptName, args)
+						: prompts.getBody(promptName);
+
+				// Add context header to clarify this is an already-loaded prompt
+				const contextNote = dedent`
+					<!--
+					MCP PROMPT: ${promptName}
+					This prompt is already loaded into your context.
+					Do NOT call devskills_get_skill("${promptName}") - it is not a skill.
+					Proceed directly with the instructions below.
+					-->
+
+				`;
+
 				return {
 					messages: [
 						{
 							role: "user",
-							content: { type: "text", text: body },
+							content: { type: "text", text: contextNote + body },
 						},
 					],
 				};

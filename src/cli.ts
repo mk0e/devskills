@@ -4,7 +4,13 @@
  * Command-line interface for devskills MCP server.
  */
 
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import {
+	existsSync,
+	mkdirSync,
+	readdirSync,
+	statSync,
+	writeFileSync,
+} from "node:fs";
 import { join, resolve } from "node:path";
 import { Command } from "commander";
 
@@ -16,7 +22,7 @@ import {
 	SKILLS_GITKEEP,
 } from "./templates/repoTemplate.js";
 import { generateSkillMd } from "./templates/skillTemplate.js";
-import { validateSkill } from "./validation.js";
+import { validatePrompt, validateSkill } from "./validation.js";
 import { VERSION } from "./version.js";
 
 const program = new Command();
@@ -173,31 +179,93 @@ program
 	});
 
 program
-	.command("validate-skill <skillPath>")
-	.description("Validate a skill directory")
-	.action(async (skillPath: string) => {
-		const targetPath = resolve(skillPath);
+	.command("validate [path]")
+	.description("Validate skills and/or prompts in a directory")
+	.option("--skills-only", "Only validate skills")
+	.option("--prompts-only", "Only validate prompts")
+	.action(
+		async (
+			pathArg: string | undefined,
+			options: { skillsOnly?: boolean; promptsOnly?: boolean },
+		) => {
+			const targetPath = resolve(pathArg ?? ".");
 
-		if (!existsSync(targetPath)) {
-			console.error(`Error: Path '${targetPath}' does not exist.`);
-			process.exit(1);
-		}
+			if (!existsSync(targetPath)) {
+				console.error(`Error: Path '${targetPath}' does not exist.`);
+				process.exit(1);
+			}
 
-		const result = validateSkill(targetPath);
+			let hasErrors = false;
+			const validateSkillsFlag = !options.promptsOnly;
+			const validatePromptsFlag = !options.skillsOnly;
 
-		if (result.valid) {
-			console.log(`✓ ${result.message}`);
-			process.exit(0);
-		} else {
-			console.error(`✗ ${result.message}`);
-			if (result.errors && result.errors.length > 1) {
-				console.error("\nErrors:");
-				for (const error of result.errors) {
-					console.error(`  - ${error}`);
+			// Validate skills
+			if (validateSkillsFlag) {
+				const skillsDir = join(targetPath, "skills");
+				if (existsSync(skillsDir) && statSync(skillsDir).isDirectory()) {
+					console.log("Validating skills...\n");
+					const items = readdirSync(skillsDir);
+					for (const item of items) {
+						const skillPath = join(skillsDir, item);
+						if (!statSync(skillPath).isDirectory()) continue;
+						if (item.startsWith(".")) continue;
+
+						const result = validateSkill(skillPath);
+						if (result.valid) {
+							console.log(`  ✓ ${item}`);
+						} else {
+							console.error(`  ✗ ${item}: ${result.message}`);
+							hasErrors = true;
+						}
+					}
+					console.log();
 				}
 			}
-			process.exit(1);
-		}
-	});
+
+			// Validate prompts
+			if (validatePromptsFlag) {
+				const promptsDir = join(targetPath, "prompts");
+				if (existsSync(promptsDir) && statSync(promptsDir).isDirectory()) {
+					console.log("Validating prompts...\n");
+					const items = readdirSync(promptsDir);
+					for (const item of items) {
+						if (!item.endsWith(".md")) continue;
+						const promptPath = join(promptsDir, item);
+						if (!statSync(promptPath).isFile()) continue;
+
+						const promptName = item.slice(0, -3);
+						const result = validatePrompt(promptPath);
+
+						if (result.valid && result.warnings.length === 0) {
+							console.log(`  ✓ ${promptName}`);
+						} else if (result.valid) {
+							console.log(`  ⚠ ${promptName}`);
+							for (const warning of result.warnings) {
+								console.log(`      Warning: ${warning}`);
+							}
+						} else {
+							console.error(`  ✗ ${promptName}`);
+							for (const error of result.errors) {
+								console.error(`      Error: ${error}`);
+							}
+							for (const warning of result.warnings) {
+								console.log(`      Warning: ${warning}`);
+							}
+							hasErrors = true;
+						}
+					}
+					console.log();
+				}
+			}
+
+			if (hasErrors) {
+				console.error("Validation failed with errors.");
+				process.exit(1);
+			} else {
+				console.log("All validations passed!");
+				process.exit(0);
+			}
+		},
+	);
 
 program.parse();

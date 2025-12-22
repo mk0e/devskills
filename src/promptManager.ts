@@ -7,6 +7,8 @@ import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
+import { z } from "zod";
+import { type PromptArguments, PromptArgumentsSchema } from "./schemas.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,6 +19,7 @@ const __dirname = dirname(__filename);
 export interface PromptInfo {
 	name: string;
 	description: string;
+	arguments?: PromptArguments;
 }
 
 /**
@@ -128,7 +131,7 @@ export class PromptManager {
 	/**
 	 * Return list of all prompts with metadata.
 	 *
-	 * @returns Array of objects with 'name' and 'description' keys.
+	 * @returns Array of objects with 'name', 'description', and optional 'arguments'.
 	 */
 	listAll(): PromptInfo[] {
 		const prompts = this.discoverPrompts();
@@ -141,9 +144,16 @@ export class PromptManager {
 			try {
 				const content = readFileSync(promptPath, "utf-8");
 				const fm = this.parseFrontmatter(content);
+				const promptName = (fm.name as string) ?? name;
+
+				// Get merged arguments (frontmatter + auto-discovered)
+				const mergedArgs = this.getMergedArguments(promptName);
+				const hasArgs = Object.keys(mergedArgs).length > 0;
+
 				result.push({
-					name: (fm.name as string) ?? name,
+					name: promptName,
 					description: (fm.description as string) ?? "",
+					...(hasArgs ? { arguments: mergedArgs } : {}),
 				});
 			} catch {
 				// Skip prompts we can't read
@@ -171,5 +181,139 @@ export class PromptManager {
 
 		const content = readFileSync(promptPath, "utf-8");
 		return this.extractBody(content);
+	}
+
+	/**
+	 * Extract template variable names from prompt body.
+	 *
+	 * @param name - Prompt name to extract variables from.
+	 * @returns Array of unique variable names found in {{var}} patterns.
+	 */
+	getTemplateVariables(name: string): string[] {
+		const body = this.getBody(name);
+		const matches = body.matchAll(/\{\{(\w+)\}\}/g);
+		const vars = new Set<string>();
+		for (const match of matches) {
+			vars.add(match[1]);
+		}
+		return [...vars];
+	}
+
+	/**
+	 * Get parsed arguments from prompt frontmatter.
+	 *
+	 * @param name - Prompt name to get arguments for.
+	 * @returns Parsed arguments object, or empty object if none defined.
+	 */
+	getArguments(name: string): PromptArguments {
+		const prompts = this.discoverPrompts();
+		const promptPath = prompts.get(name);
+
+		if (!promptPath) {
+			const available = [...prompts.keys()].sort().join(", ");
+			throw new Error(`Prompt '${name}' not found. Available: ${available}`);
+		}
+
+		const content = readFileSync(promptPath, "utf-8");
+		const fm = this.parseFrontmatter(content);
+
+		if (!fm.arguments) {
+			return {};
+		}
+
+		const parsed = PromptArgumentsSchema.safeParse(fm.arguments);
+		if (!parsed.success) {
+			return {};
+		}
+
+		return parsed.data;
+	}
+
+	/**
+	 * Get merged arguments from frontmatter and auto-discovered body variables.
+	 * Frontmatter definitions take precedence. Body variables without frontmatter
+	 * definition become required string arguments.
+	 *
+	 * @param name - Prompt name to get merged arguments for.
+	 * @returns Merged arguments object.
+	 */
+	getMergedArguments(name: string): PromptArguments {
+		const frontmatterArgs = this.getArguments(name);
+		const bodyVars = this.getTemplateVariables(name);
+
+		const merged: PromptArguments = { ...frontmatterArgs };
+
+		for (const varName of bodyVars) {
+			if (!(varName in merged)) {
+				merged[varName] = {};
+			}
+		}
+
+		return merged;
+	}
+
+	/**
+	 * Build a Zod schema from merged arguments for MCP argsSchema.
+	 *
+	 * @param name - Prompt name to build schema for.
+	 * @returns Zod raw shape for MCP argsSchema.
+	 */
+	buildArgsSchema(name: string): z.ZodRawShape {
+		const mergedArgs = this.getMergedArguments(name);
+		const shape: z.ZodRawShape = {};
+
+		for (const [argName, argDef] of Object.entries(mergedArgs)) {
+			let fieldSchema: z.ZodTypeAny;
+
+			// Determine base type
+			const argType = argDef.type ?? "string";
+			switch (argType) {
+				case "number":
+					fieldSchema = z.number();
+					break;
+				case "boolean":
+					fieldSchema = z.boolean();
+					break;
+				default:
+					fieldSchema = z.string();
+			}
+
+			// Add description if present
+			if (argDef.description) {
+				fieldSchema = fieldSchema.describe(argDef.description);
+			}
+
+			// Make optional with default, or required
+			if (argDef.default !== undefined) {
+				fieldSchema = fieldSchema.default(argDef.default);
+			} else if (argType === "boolean") {
+				// Booleans without defaults are optional
+				fieldSchema = fieldSchema.optional();
+			} else {
+				// Required - no default
+			}
+
+			shape[argName] = fieldSchema;
+		}
+
+		return shape;
+	}
+
+	/**
+	 * Get prompt body with variables substituted.
+	 *
+	 * @param name - Prompt name.
+	 * @param args - Arguments to substitute into template.
+	 * @returns Body with {{var}} patterns replaced by argument values.
+	 */
+	getBodyWithArgs(name: string, args: Record<string, unknown>): string {
+		let body = this.getBody(name);
+
+		for (const [key, value] of Object.entries(args)) {
+			const pattern = new RegExp(`\\{\\{${key}\\}\\}`, "g");
+			body = body.replace(pattern, String(value));
+		}
+
+		return body;
 	}
 }

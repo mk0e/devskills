@@ -3,10 +3,11 @@
  */
 
 import { execSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import dedent from "dedent";
 
 const TEST_DIR = join(tmpdir(), `devskills-cli-test-${Date.now()}`);
 const CLI_PATH = join(process.cwd(), "dist", "cli.js");
@@ -134,6 +135,111 @@ describe("CLI", () => {
 			});
 
 			expect(output.trim()).toBe(packageJson.version);
+		});
+	});
+
+	describe("validate command", () => {
+		it("validates all skills and prompts by default", () => {
+			// Create valid skill
+			const skillDir = join(TEST_DIR, "skills", "my-skill");
+			mkdirSync(skillDir, { recursive: true });
+			writeFileSync(
+				join(skillDir, "SKILL.md"),
+				dedent`---
+					name: my-skill
+					description: Test skill
+					---
+
+					Skill content.
+				`,
+			);
+
+			// Create valid prompt
+			const promptsDir = join(TEST_DIR, "prompts");
+			mkdirSync(promptsDir, { recursive: true });
+			writeFileSync(
+				join(promptsDir, "my-prompt.md"),
+				dedent`---
+					name: my-prompt
+					description: Test prompt
+					arguments:
+					  code:
+					    description: Code
+					---
+
+					{{code}}
+				`,
+			);
+
+			const output = execSync(`node ${CLI_PATH} validate ${TEST_DIR}`, {
+				encoding: "utf-8",
+			});
+			expect(output).toContain("my-skill");
+			expect(output).toContain("my-prompt");
+		});
+
+		it("validates only skills with --skills-only", () => {
+			const skillDir = join(TEST_DIR, "skills", "my-skill");
+			mkdirSync(skillDir, { recursive: true });
+			writeFileSync(
+				join(skillDir, "SKILL.md"),
+				dedent`---
+					name: my-skill
+					description: Test skill
+					---
+
+					Content.
+				`,
+			);
+
+			const output = execSync(`node ${CLI_PATH} validate ${TEST_DIR} --skills-only`, {
+				encoding: "utf-8",
+			});
+			expect(output).toContain("my-skill");
+		});
+
+		it("validates only prompts with --prompts-only", () => {
+			const promptsDir = join(TEST_DIR, "prompts");
+			mkdirSync(promptsDir, { recursive: true });
+			writeFileSync(
+				join(promptsDir, "my-prompt.md"),
+				dedent`---
+					name: my-prompt
+					description: Test
+					arguments:
+					  code:
+					    description: Code
+					---
+
+					{{code}}
+				`,
+			);
+
+			const output = execSync(`node ${CLI_PATH} validate ${TEST_DIR} --prompts-only`, {
+				encoding: "utf-8",
+			});
+			expect(output).toContain("my-prompt");
+		});
+
+		it("exits with 1 when validation errors found", () => {
+			const promptsDir = join(TEST_DIR, "prompts");
+			mkdirSync(promptsDir, { recursive: true });
+			writeFileSync(
+				join(promptsDir, "invalid.md"),
+				dedent`---
+					name: invalid
+					description: Test
+					---
+
+					{{undefined_var}}
+				`,
+			);
+
+			expect(() => {
+				execSync(`node ${CLI_PATH} validate ${TEST_DIR} --prompts-only`, {
+					stdio: "pipe",
+				});
+			}).toThrow();
 		});
 	});
 });
