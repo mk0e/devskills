@@ -239,50 +239,49 @@ export function createServer(
 	for (const promptInfo of prompts.listAll()) {
 		const promptName = promptInfo.name;
 		const promptDesc = promptInfo.description;
-		const promptArgs = promptInfo.arguments;
 
-		// Build argsSchema if prompt has arguments
-		const argsSchema = promptArgs
-			? prompts.buildArgsSchema(promptName)
-			: undefined;
+		// Build argsSchema and check if prompt has arguments
+		const argsSchema = prompts.buildArgsSchema(promptName);
+		const hasArgs = Object.keys(argsSchema).length > 0;
 
-		server.registerPrompt(
-			promptName,
-			{
-				title: promptName,
-				description: promptDesc,
-				...(argsSchema ? { argsSchema } : {}),
-			},
-			(request) => {
-				// Note: MCP SDK handles schema validation and defaults automatically
-				// We receive the already-validated args in the request
-				const args = request.arguments ?? {};
-				const body =
-					Object.keys(args).length > 0
-						? prompts.getBodyWithArgs(promptName, args)
-						: prompts.getBody(promptName);
+		// Helper to build the prompt response
+		const buildResponse = (body: string) => {
+			const contextNote = dedent`
+				<!--
+				MCP PROMPT: ${promptName}
+				This prompt is already loaded into your context.
+				Do NOT call devskills_get_skill("${promptName}") - it is not a skill.
+				Proceed directly with the instructions below.
+				-->
 
-				// Add context header to clarify this is an already-loaded prompt
-				const contextNote = dedent`
-					<!--
-					MCP PROMPT: ${promptName}
-					This prompt is already loaded into your context.
-					Do NOT call devskills_get_skill("${promptName}") - it is not a skill.
-					Proceed directly with the instructions below.
-					-->
+			`;
+			return {
+				messages: [
+					{
+						role: "user" as const,
+						content: { type: "text" as const, text: contextNote + body },
+					},
+				],
+			};
+		};
 
-				`;
-
-				return {
-					messages: [
-						{
-							role: "user",
-							content: { type: "text", text: contextNote + body },
-						},
-					],
-				};
-			},
-		);
+		// MCP SDK callback signature differs based on argsSchema:
+		// - With argsSchema: callback(args, extra) - first param is parsed args
+		// - Without argsSchema: callback(extra) - no args param
+		if (hasArgs) {
+			server.registerPrompt(
+				promptName,
+				{ title: promptName, description: promptDesc, argsSchema },
+				(args: Record<string, unknown>) =>
+					buildResponse(prompts.getBodyWithArgs(promptName, args)),
+			);
+		} else {
+			server.registerPrompt(
+				promptName,
+				{ title: promptName, description: promptDesc },
+				() => buildResponse(prompts.getBody(promptName)),
+			);
+		}
 	}
 
 	return server;

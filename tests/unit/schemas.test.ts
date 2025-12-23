@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { PromptArgumentSchema } from "../src/schemas.js";
+import { PromptArgumentSchema } from "../../src/schemas.js";
 
 describe("PromptArgumentSchema", () => {
 	it("accepts minimal argument (description only)", () => {

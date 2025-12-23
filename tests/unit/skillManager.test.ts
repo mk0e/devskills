@@ -6,7 +6,7 @@ import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { SkillManager } from "../src/skillManager.js";
+import { SkillManager } from "../../src/skillManager.js";
 import dedent from "dedent";
 
 const TEST_DIR = join(tmpdir(), `devskills-test-${Date.now()}`);

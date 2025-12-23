@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import dedent from "dedent";
-import { validatePrompt } from "../src/validation.js";
+import { validatePrompt } from "../../src/validation.js";
 
 const TEST_DIR = join(tmpdir(), `devskills-validation-test-${Date.now()}`);
 

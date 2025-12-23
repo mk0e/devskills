@@ -33,8 +33,10 @@ tests/webTestServer.js
 tests/webTestServer.js.map
 tests/webhost/*.d.ts
 tests/webhost/webtsc.js
-tests/cases/**/*.js
-tests/cases/**/*.js.map
+tests/**/*.js
+tests/**/*.js.map
+tests/**/*.d.ts
+tests/**/*.d.ts.map
 *.config
 scripts/eslint/built/
 scripts/debug.bat
