@@ -22,14 +22,31 @@ Without skills, you'd need to re-explain processes every conversation. With skil
 - **Shareability** - Teams can share knowledge via git repositories
 - **Progressive loading** - Context is loaded only when needed
 
-## DevSkills: Extending the Concept
+## The Skills Landscape (Late 2025)
 
-DevSkills brings Anthropic's skills concept to any MCP-compatible AI agent through the Model Context Protocol. This means:
+**Timeline:** Anthropic introduced skills (Oct 2025) → opened as standard at [agentskills.io](https://agentskills.io) (Dec 2025) → now governed by [Agentic AI Foundation](https://www.linuxfoundation.org/press/agentic-ai-foundation) (Linux Foundation, co-founded by Anthropic, OpenAI, Block).
 
-- **GitHub Copilot**, **Cursor**, **Claude Code**, and any other MCP-enabled tool can use skills
-- Skills are shared via **git repositories**, enabling team collaboration
-- Multiple skill repositories can be connected simultaneously
-- Skills can optionally be exposed as **user-triggered prompts**
+**Native support:** All major coding agents now load skills from filesystem:
+- Claude Code: `~/.claude/skills/`, `.claude/skills/`
+- GitHub Copilot: `.github/skills/`
+- OpenAI Codex: `~/.codex/skills/`
+- Cursor, Goose, DeepAgents: similar patterns
+
+## Where DevSkills Fits
+
+DevSkills delivers skills via **MCP** instead of native filesystem loading. Not better for everyone:
+
+| Scenario | Native | DevSkills (MCP) |
+|----------|--------|-----------------|
+| Individual dev, major coding agent | ✅ Simpler | Overhead |
+| Custom agents (OpenAI Agents SDK, Claude Agent SDK, LangChain) | Must implement | ✅ Plug-and-play |
+| Enterprise: centralized governance, audit trail | Complex | ✅ Single server |
+| Proprietary skills, security-sensitive | Risk on dev machines | ✅ Server-side only |
+| Workflow platforms (n8n) | N/A | ✅ MCP integration |
+
+**Bottom line:** Native skills win for individual devs using Claude Code/Copilot/Codex directly. DevSkills wins for custom SDK-built agents without native skills loading, or enterprise needing centralized deployment with governance.
+
+**DevSkills provides:** MCP-based delivery, git-based sharing, multi-repo support, optional slash-command prompts.
 
 ## Skills vs Prompts
 
