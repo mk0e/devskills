@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Command-line interface for devskills MCP server.
+ * Command-line interface for skillkit MCP server.
  */
 
 import {
@@ -28,8 +28,8 @@ import { VERSION } from "./version.js";
 const program = new Command();
 
 program
-	.name("devskills")
-	.description("DevSkills - Reusable AI coding agent skills via MCP")
+	.name("skillkit-mcp")
+	.description("SkillKit - Reusable AI coding agent skills via MCP")
 	.version(VERSION)
 	.option(
 		"-s, --skills-path <paths...>",
@@ -114,7 +114,7 @@ program
 				"  2. git init && git add . && git commit -m 'Initial commit'",
 			);
 			console.log(
-				"  3. Create your first skill: npx devskills init-skill my-skill --path ./skills",
+				"  3. Create your first skill: npx skillkit-mcp init-skill my-skill --path ./skills",
 			);
 			console.log("  4. Push to your team's git remote");
 		},

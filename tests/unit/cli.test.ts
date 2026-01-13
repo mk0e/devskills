@@ -9,7 +9,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import dedent from "dedent";
 
-const TEST_DIR = join(tmpdir(), `devskills-cli-test-${Date.now()}`);
+const TEST_DIR = join(tmpdir(), `skillkit-cli-test-${Date.now()}`);
 const CLI_PATH = join(process.cwd(), "dist", "cli.js");
 const packageJson = JSON.parse(
 	readFileSync(join(process.cwd(), "package.json"), "utf-8"),
@@ -121,7 +121,7 @@ describe("CLI", () => {
 				encoding: "utf-8",
 			});
 
-			expect(output).toContain("DevSkills");
+			expect(output).toContain("SkillKit");
 			expect(output).toContain("--skills-path");
 			expect(output).toContain("init");
 			expect(output).toContain("init-skill");

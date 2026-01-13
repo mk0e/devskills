@@ -1,5 +1,5 @@
 /**
- * Prompt discovery and management for devskills MCP server.
+ * Prompt discovery and management for skillkit MCP server.
  */
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";

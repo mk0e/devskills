@@ -65,7 +65,7 @@ export const ListSkillsOutputSchema = z.object({
 			z.object({
 				name: z
 					.string()
-					.describe("Skill identifier used with devskills_get_skill()"),
+					.describe("Skill identifier used with skillkit_get_skill()"),
 				description: z.string().describe("Brief description of what the skill does"),
 			}),
 		)

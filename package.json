@@ -1,13 +1,23 @@
 {
-	"name": "devskills",
+	"name": "skillkit-mcp",
 	"version": "0.1.0",
 	"description": "MCP server exposing reusable skills for AI coding agents",
 	"type": "module",
 	"packageManager": "pnpm@9.15.0",
 	"main": "dist/index.js",
-	"bin": {
-		"devskills": "dist/cli.js"
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
 	},
+	"bin": {
+		"skillkit-mcp": "dist/cli.js"
+	},
+	"files": [
+		"dist",
+		"bundled"
+	],
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"build": "tsc -p tsconfig.build.json",
@@ -23,7 +33,8 @@
 		"check": "biome check --write .",
 		"init:repo": "node dist/cli.js init",
 		"init:skill": "node dist/cli.js init-skill",
-		"validate": "node dist/cli.js validate"
+		"validate": "node dist/cli.js validate",
+		"prepublishOnly": "pnpm run build && pnpm run test"
 	},
 	"engines": {
 		"node": ">=18"
@@ -33,6 +44,7 @@
 		"model-context-protocol",
 		"ai",
 		"skills",
+		"skillkit",
 		"claude",
 		"cursor",
 		"copilot"
@@ -41,7 +53,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/mk0e/devskills"
+		"url": "https://github.com/mk0e/skillkit-mcp"
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.24.3",

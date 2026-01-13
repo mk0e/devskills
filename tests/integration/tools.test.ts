@@ -34,17 +34,17 @@ describe("MCP Server Tools", () => {
 		const result = await client.listTools();
 		const toolNames = result.tools.map((tool) => tool.name);
 
-		expect(toolNames).toContain("devskills_list_skills");
-		expect(toolNames).toContain("devskills_get_skill");
-		expect(toolNames).toContain("devskills_get_script");
-		expect(toolNames).toContain("devskills_get_reference");
-		expect(toolNames).toContain("devskills_get_skill_paths");
+		expect(toolNames).toContain("skillkit_list_skills");
+		expect(toolNames).toContain("skillkit_get_skill");
+		expect(toolNames).toContain("skillkit_get_script");
+		expect(toolNames).toContain("skillkit_get_reference");
+		expect(toolNames).toContain("skillkit_get_skill_paths");
 		expect(toolNames).toHaveLength(5);
 	});
 
-	it("devskills_list_skills returns skill metadata", async () => {
+	it("skillkit_list_skills returns skill metadata", async () => {
 		const result = await client.callTool({
-			name: "devskills_list_skills",
+			name: "skillkit_list_skills",
 			arguments: {},
 		});
 
@@ -70,9 +70,9 @@ describe("MCP Server Tools", () => {
 		expect(anotherSkill.description).toBe("Another test skill");
 	});
 
-	it("devskills_get_skill returns SKILL.md content", async () => {
+	it("skillkit_get_skill returns SKILL.md content", async () => {
 		const result = await client.callTool({
-			name: "devskills_get_skill",
+			name: "skillkit_get_skill",
 			arguments: { name: "test-skill" },
 		});
 
@@ -86,9 +86,9 @@ describe("MCP Server Tools", () => {
 		);
 	});
 
-	it("devskills_get_script returns script content", async () => {
+	it("skillkit_get_script returns script content", async () => {
 		const result = await client.callTool({
-			name: "devskills_get_script",
+			name: "skillkit_get_script",
 			arguments: { skill: "test-skill", filename: "validate.sh" },
 		});
 
@@ -100,9 +100,9 @@ describe("MCP Server Tools", () => {
 		expect(content[0].text).toContain('echo "Validating..."');
 	});
 
-	it("devskills_get_reference returns reference content", async () => {
+	it("skillkit_get_reference returns reference content", async () => {
 		const result = await client.callTool({
-			name: "devskills_get_reference",
+			name: "skillkit_get_reference",
 			arguments: { skill: "test-skill", filename: "guide.md" },
 		});
 
@@ -116,9 +116,9 @@ describe("MCP Server Tools", () => {
 		);
 	});
 
-	it("devskills_get_skill_paths returns configured paths", async () => {
+	it("skillkit_get_skill_paths returns configured paths", async () => {
 		const result = await client.callTool({
-			name: "devskills_get_skill_paths",
+			name: "skillkit_get_skill_paths",
 			arguments: {},
 		});
 
@@ -132,18 +132,18 @@ describe("MCP Server Tools", () => {
 		expect(paths).toContain(testDir);
 	});
 
-	it("devskills_get_skill returns error for unknown skill", async () => {
+	it("skillkit_get_skill returns error for unknown skill", async () => {
 		const result = await client.callTool({
-			name: "devskills_get_skill",
+			name: "skillkit_get_skill",
 			arguments: { name: "nonexistent" },
 		});
 
 		expect(result.isError).toBe(true);
 	});
 
-	it("devskills_get_script returns error for missing script", async () => {
+	it("skillkit_get_script returns error for missing script", async () => {
 		const result = await client.callTool({
-			name: "devskills_get_script",
+			name: "skillkit_get_script",
 			arguments: { skill: "test-skill", filename: "missing.sh" },
 		});
 

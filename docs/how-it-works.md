@@ -1,14 +1,14 @@
 # How It Works
 
-This document explains the DevSkills MCP server architecture and the tools it exposes.
+This document explains the SkillKit MCP server architecture and the tools it exposes.
 
 ## Architecture Overview
 
-DevSkills is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that exposes skills and prompts to AI coding agents. It runs as a stdio-based service, communicating with MCP clients through standard input/output.
+SkillKit is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that exposes skills and prompts to AI coding agents. It runs as a stdio-based service, communicating with MCP clients through standard input/output.
 
 ```
 ┌─────────────────┐     stdio      ┌──────────────────┐
-│  AI Agent       │ ◄────────────► │  DevSkills       │
+│  AI Agent       │ ◄────────────► │  SkillKit       │
 │  (Copilot, etc) │                │  MCP Server      │
 └─────────────────┘                └────────┬─────────┘
                                             │
@@ -34,8 +34,8 @@ Skills are discovered from multiple sources with configurable priority:
 | Priority | Source | Description |
 |----------|--------|-------------|
 | 1 (Highest) | CLI `--skills-path` | Directories specified at startup |
-| 2 | `DEVSKILLS_SKILLS_PATH` env | Colon-separated directory list |
-| 3 (Lowest) | Bundled skills | Default skills shipped with DevSkills |
+| 2 | `SKILLKIT_SKILLS_PATH` env | Colon-separated directory list |
+| 3 (Lowest) | Bundled skills | Default skills shipped with SkillKit |
 
 When a skill name exists in multiple locations, higher-priority paths override lower ones. This allows customizing bundled skills.
 
@@ -50,9 +50,9 @@ The server scans configured directories for skill subdirectories:
 
 ## MCP Tools
 
-DevSkills exposes five tools to AI agents:
+SkillKit exposes five tools to AI agents:
 
-### devskills_list_skills
+### skillkit_list_skills
 
 Lists all available skills with their name and description.
 
@@ -70,7 +70,7 @@ Lists all available skills with their name and description.
 
 **Usage:** Call this first to discover available skills. The agent matches user requests to skill descriptions.
 
-### devskills_get_skill
+### skillkit_get_skill
 
 Fetches the full SKILL.md content for a skill.
 
@@ -83,7 +83,7 @@ Fetches the full SKILL.md content for a skill.
 
 **Usage:** After identifying a relevant skill, call this to load the full instructions.
 
-### devskills_get_script
+### skillkit_get_script
 
 Fetches a script file from a skill's `scripts/` folder.
 
@@ -96,7 +96,7 @@ Fetches a script file from a skill's `scripts/` folder.
 
 **Usage:** Only call when skill instructions reference a specific script.
 
-### devskills_get_reference
+### skillkit_get_reference
 
 Fetches a reference document from a skill's `references/` folder.
 
@@ -109,7 +109,7 @@ Fetches a reference document from a skill's `references/` folder.
 
 **Usage:** Only call when skill instructions reference a specific document.
 
-### devskills_get_skill_paths
+### skillkit_get_skill_paths
 
 Returns configured skill directories where new skills can be created.
 
@@ -141,13 +141,13 @@ Prompts appear as slash commands or menu items in MCP clients.
 ```
 1. User: "Help me review this code"
          │
-2. Agent: devskills_list_skills()
+2. Agent: skillkit_list_skills()
          │
 3. Server: Returns [{name: "code-review", description: "..."}]
          │
 4. Agent: Matches "review code" → "code-review" skill
          │
-5. Agent: devskills_get_skill("code-review")
+5. Agent: skillkit_get_skill("code-review")
          │
 6. Server: Returns SKILL.md content
          │
@@ -163,9 +163,9 @@ Prompts appear as slash commands or menu items in MCP clients.
          │
 2. Client: Sends prompt body to agent
          │
-3. Agent: Sees "use devskills to get code-review skill"
+3. Agent: Sees "use skillkit to get code-review skill"
          │
-4. Agent: devskills_get_skill("code-review")
+4. Agent: skillkit_get_skill("code-review")
          │
 5. Agent: Follows skill instructions
 ```
@@ -191,7 +191,7 @@ Skills are validated for:
 - Name format: hyphen-case, 1-64 characters
 - Description: max 1024 characters, no `<>` characters
 
-Use `devskills validate-skill <path>` to check a skill.
+Use `skillkit-mcp validate-skill <path>` to check a skill.
 
 ## Next Steps
 

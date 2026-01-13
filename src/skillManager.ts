@@ -1,5 +1,5 @@
 /**
- * Skill discovery and management for devskills MCP server.
+ * Skill discovery and management for skillkit MCP server.
  */
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
@@ -64,8 +64,8 @@ export class SkillManager {
 			}
 		}
 
-		// 2. DEVSKILLS_SKILLS_PATH env var (colon-separated)
-		const envPaths = process.env.DEVSKILLS_SKILLS_PATH ?? "";
+		// 2. SKILLKIT_SKILLS_PATH env var (colon-separated)
+		const envPaths = process.env.SKILLKIT_SKILLS_PATH ?? "";
 		for (const pathStr of envPaths.split(":")) {
 			const trimmed = pathStr.trim();
 			if (trimmed) {

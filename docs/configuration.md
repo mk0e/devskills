@@ -1,13 +1,13 @@
 # Configuration
 
-This guide covers how to configure DevSkills for different AI agents and setups.
+This guide covers how to configure SkillKit for different AI agents and setups.
 
 ## CLI Options
 
 ### Running the Server
 
 ```bash
-devskills [options]
+skillkit-mcp [options]
 ```
 
 | Option | Description |
@@ -21,42 +21,42 @@ devskills [options]
 
 ```bash
 # Run with bundled skills only
-devskills
+skillkit-mcp
 
 # Add a single skills directory
-devskills --skills-path ./my-skills
+skillkit-mcp --skills-path ./my-skills
 
 # Add multiple directories
-devskills --skills-path ./team-skills --skills-path ./personal-skills
+skillkit-mcp --skills-path ./team-skills --skills-path ./personal-skills
 
 # Disable bundled skills
-devskills --skills-path ./my-skills --no-bundled
+skillkit-mcp --skills-path ./my-skills --no-bundled
 ```
 
 ### Other Commands
 
 ```bash
 # Initialize a skills repository
-devskills init [path] [-n, --name <name>] [-f, --force]
+skillkit-mcp init [path] [-n, --name <name>] [-f, --force]
 
 # Create a new skill
-devskills init-skill <skillName> [-p, --path <path>]
+skillkit-mcp init-skill <skillName> [-p, --path <path>]
 
 # Validate a skill
-devskills validate-skill <skillPath>
+skillkit-mcp validate-skill <skillPath>
 ```
 
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `DEVSKILLS_SKILLS_PATH` | Colon-separated list of skills directories |
+| `SKILLKIT_SKILLS_PATH` | Colon-separated list of skills directories |
 
 **Example:**
 
 ```bash
-export DEVSKILLS_SKILLS_PATH="/path/to/team-skills:/path/to/personal-skills"
-devskills
+export SKILLKIT_SKILLS_PATH="/path/to/team-skills:/path/to/personal-skills"
+skillkit-mcp
 ```
 
 ## Path Priority
@@ -64,7 +64,7 @@ devskills
 When the same skill name exists in multiple locations, higher-priority paths override lower ones:
 
 1. **CLI arguments** (`--skills-path`) - Highest priority
-2. **Environment variable** (`DEVSKILLS_SKILLS_PATH`)
+2. **Environment variable** (`SKILLKIT_SKILLS_PATH`)
 3. **Bundled skills** - Lowest priority
 
 This allows you to override bundled skills with custom versions.
@@ -74,7 +74,7 @@ This allows you to override bundled skills with custom versions.
 Connect multiple skill repositories by specifying multiple paths:
 
 ```bash
-devskills \
+skillkit-mcp \
   --skills-path ~/work/team-skills/skills \
   --skills-path ~/personal/my-skills/skills \
   --skills-path ~/repos/open-source-skills/skills
@@ -83,7 +83,7 @@ devskills \
 Or via environment variable:
 
 ```bash
-export DEVSKILLS_SKILLS_PATH="~/work/team-skills/skills:~/personal/my-skills/skills"
+export SKILLKIT_SKILLS_PATH="~/work/team-skills/skills:~/personal/my-skills/skills"
 ```
 
 **Note:** Paths support tilde expansion (`~`) for home directories.
@@ -98,16 +98,16 @@ Add to your VS Code settings (`.vscode/settings.json` or user settings):
 {
   "mcp": {
     "servers": {
-      "devskills": {
+      "skillkit": {
         "type": "stdio",
         "command": "npx",
         "args": [
           "tsx",
-          "/absolute/path/to/devskills-ts/src/cli.ts",
+          "/absolute/path/to/skillkit-mcp/src/cli.ts",
           "--skills-path",
           "/absolute/path/to/team-skills/skills"
         ],
-        "cwd": "/absolute/path/to/devskills-ts"
+        "cwd": "/absolute/path/to/skillkit-mcp"
       }
     }
   }
@@ -120,18 +120,18 @@ Add to your VS Code settings (`.vscode/settings.json` or user settings):
 {
   "mcp": {
     "servers": {
-      "devskills": {
+      "skillkit": {
         "type": "stdio",
         "command": "npx",
         "args": [
           "tsx",
-          "/absolute/path/to/devskills-ts/src/cli.ts",
+          "/absolute/path/to/skillkit-mcp/src/cli.ts",
           "--skills-path",
           "/path/to/team-skills/skills",
           "--skills-path",
           "/path/to/personal-skills/skills"
         ],
-        "cwd": "/absolute/path/to/devskills-ts"
+        "cwd": "/absolute/path/to/skillkit-mcp"
       }
     }
   }
@@ -144,16 +144,16 @@ Add to your VS Code settings (`.vscode/settings.json` or user settings):
 {
   "mcp": {
     "servers": {
-      "devskills": {
+      "skillkit": {
         "type": "stdio",
         "command": "npx",
         "args": [
           "tsx",
-          "/absolute/path/to/devskills-ts/src/cli.ts"
+          "/absolute/path/to/skillkit-mcp/src/cli.ts"
         ],
-        "cwd": "/absolute/path/to/devskills-ts",
+        "cwd": "/absolute/path/to/skillkit-mcp",
         "env": {
-          "DEVSKILLS_SKILLS_PATH": "/path/to/skills"
+          "SKILLKIT_SKILLS_PATH": "/path/to/skills"
         }
       }
     }
@@ -171,11 +171,11 @@ Once the package is published to npm:
 {
   "mcp": {
     "servers": {
-      "devskills": {
+      "skillkit": {
         "type": "stdio",
         "command": "npx",
         "args": [
-          "devskills",
+          "skillkit-mcp",
           "--skills-path",
           "/path/to/skills"
         ]
@@ -185,7 +185,7 @@ Once the package is published to npm:
 }
 ```
 
-> **Note:** The npm package isn't published yet. Use the development configurations above for now.
+> **Tip:** This is the recommended configuration for production use.
 
 ### Claude Code
 
@@ -194,15 +194,15 @@ Add to your Claude Code MCP configuration (`.mcp.json` in your project or `~/.cl
 ```json
 {
   "mcpServers": {
-    "devskills": {
+    "skillkit": {
       "command": "npx",
       "args": [
         "tsx",
-        "/path/to/devskills-ts/src/cli.ts",
+        "/path/to/skillkit-mcp/src/cli.ts",
         "--skills-path",
         "/path/to/skills"
       ],
-      "cwd": "/path/to/devskills-ts"
+      "cwd": "/path/to/skillkit-mcp"
     }
   }
 }
@@ -215,15 +215,15 @@ Cursor uses the same MCP configuration format:
 ```json
 {
   "mcpServers": {
-    "devskills": {
+    "skillkit": {
       "command": "npx",
       "args": [
         "tsx",
-        "/path/to/devskills-ts/src/cli.ts",
+        "/path/to/skillkit-mcp/src/cli.ts",
         "--skills-path",
         "/path/to/skills"
       ],
-      "cwd": "/path/to/devskills-ts"
+      "cwd": "/path/to/skillkit-mcp"
     }
   }
 }
@@ -231,7 +231,7 @@ Cursor uses the same MCP configuration format:
 
 ## Skills Repository Structure
 
-When pointing `--skills-path` to a directory, DevSkills expects this structure:
+When pointing `--skills-path` to a directory, SkillKit expects this structure:
 
 ```
 skills-directory/
@@ -244,7 +244,7 @@ skills-directory/
 └── ...
 ```
 
-For prompts, DevSkills looks for a `prompts/` directory at the same level:
+For prompts, SkillKit looks for a `prompts/` directory at the same level:
 
 ```
 my-team-skills/
@@ -259,7 +259,7 @@ my-team-skills/
 To use only your own skills without the bundled defaults:
 
 ```bash
-devskills --skills-path ./my-skills --no-bundled
+skillkit-mcp --skills-path ./my-skills --no-bundled
 ```
 
 Or in MCP configuration:
@@ -268,17 +268,17 @@ Or in MCP configuration:
 {
   "mcp": {
     "servers": {
-      "devskills": {
+      "skillkit": {
         "type": "stdio",
         "command": "npx",
         "args": [
           "tsx",
-          "/path/to/devskills-ts/src/cli.ts",
+          "/path/to/skillkit-mcp/src/cli.ts",
           "--skills-path",
           "/path/to/skills",
           "--no-bundled"
         ],
-        "cwd": "/path/to/devskills-ts"
+        "cwd": "/path/to/skillkit-mcp"
       }
     }
   }
@@ -291,7 +291,7 @@ Or in MCP configuration:
 
 1. Check the path is correct and contains skill directories
 2. Each skill directory must have a `SKILL.md` file
-3. Validate skills with `devskills validate-skill <path>`
+3. Validate skills with `skillkit-mcp validate-skill <path>`
 
 ### Path issues
 

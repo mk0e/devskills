@@ -32,11 +32,11 @@ Without skills, you'd need to re-explain processes every conversation. With skil
 - OpenAI Codex: `~/.codex/skills/`
 - Cursor, Goose, DeepAgents: similar patterns
 
-## Where DevSkills Fits
+## Where SkillKit Fits
 
-DevSkills delivers skills via **MCP** instead of native filesystem loading. Not better for everyone:
+SkillKit delivers skills via **MCP** instead of native filesystem loading. Not better for everyone:
 
-| Scenario | Native | DevSkills (MCP) |
+| Scenario | Native | SkillKit (MCP) |
 |----------|--------|-----------------|
 | Individual dev, major coding agent | ✅ Simpler | Overhead |
 | Custom agents (OpenAI Agents SDK, Claude Agent SDK, LangChain) | Must implement | ✅ Plug-and-play |
@@ -44,13 +44,13 @@ DevSkills delivers skills via **MCP** instead of native filesystem loading. Not 
 | Proprietary skills, security-sensitive | Risk on dev machines | ✅ Server-side only |
 | Workflow platforms (n8n) | N/A | ✅ MCP integration |
 
-**Bottom line:** Native skills win for individual devs using Claude Code/Copilot/Codex directly. DevSkills wins for custom SDK-built agents without native skills loading, or enterprise needing centralized deployment with governance.
+**Bottom line:** Native skills win for individual devs using Claude Code/Copilot/Codex directly. SkillKit wins for custom SDK-built agents without native skills loading, or enterprise needing centralized deployment with governance.
 
-**DevSkills provides:** MCP-based delivery, git-based sharing, multi-repo support, optional slash-command prompts.
+**SkillKit provides:** MCP-based delivery, git-based sharing, multi-repo support, optional slash-command prompts.
 
 ## Skills vs Prompts
 
-DevSkills supports two complementary concepts: **skills** and **prompts**.
+SkillKit supports two complementary concepts: **skills** and **prompts**.
 
 ### Skills
 
@@ -65,9 +65,9 @@ skills/
 ```
 
 **How skills work:**
-1. Agent calls `devskills_list_skills()` to see available skills
+1. Agent calls `skillkit_list_skills()` to see available skills
 2. Agent matches user's request to a skill description
-3. Agent calls `devskills_get_skill("code-review")` to load instructions
+3. Agent calls `skillkit_get_skill("code-review")` to load instructions
 4. Agent follows the skill's guidance
 
 **When to use skills:**
@@ -117,7 +117,7 @@ name: code-review
 description: Start a code review session
 ---
 
-I want to review code for quality and best practices. Use devskills to get the code-review skill and follow its instructions.
+I want to review code for quality and best practices. Use skillkit to get the code-review skill and follow its instructions.
 ```
 
 This way:
@@ -139,4 +139,4 @@ This pattern ensures the agent's context window isn't overwhelmed with instructi
 ## Next Steps
 
 - [Creating Skills](creating-skills.md) - Learn how to author skills
-- [Configuration](configuration.md) - Set up DevSkills with your agent
+- [Configuration](configuration.md) - Set up SkillKit with your agent

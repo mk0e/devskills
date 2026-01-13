@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { SkillManager } from "../../src/skillManager.js";
 import dedent from "dedent";
 
-const TEST_DIR = join(tmpdir(), `devskills-test-${Date.now()}`);
+const TEST_DIR = join(tmpdir(), `skillkit-test-${Date.now()}`);
 
 function createTestSkill(
 	baseDir: string,

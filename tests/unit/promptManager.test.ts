@@ -10,7 +10,7 @@ import { PromptManager } from "../../src/promptManager.js";
 import dedent from "dedent";
 import { z } from "zod";
 
-const TEST_DIR = join(tmpdir(), `devskills-prompts-test-${Date.now()}`);
+const TEST_DIR = join(tmpdir(), `skillkit-prompts-test-${Date.now()}`);
 
 function createTestPrompt(
 	baseDir: string,

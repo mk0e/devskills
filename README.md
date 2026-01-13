@@ -1,8 +1,8 @@
-# DevSkills
+# SkillKit
 
 An MCP server that brings [Anthropic's Agent Skills](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) concept to any AI coding agent. Skills are reusable knowledge packages that teach AI agents how to perform specific tasks consistently.
 
-DevSkills extends the original concept with:
+SkillKit extends the original concept with:
 - **MCP compatibility** - Works with any MCP-enabled agent (GitHub Copilot, Cursor, Claude Code)
 - **Git-based sharing** - Share skills via git repositories across your team
 - **Multi-repo support** - Connect to multiple skill repositories simultaneously
@@ -10,14 +10,12 @@ DevSkills extends the original concept with:
 
 ## Quick Start
 
-The npm package isn't published yet. Follow these steps to run the development version.
-
-### 1. Clone and Install
+### 1. Install
 
 ```bash
-git clone https://github.com/your-org/devskills-ts.git
-cd devskills-ts
-pnpm install
+npm install -g skillkit-mcp
+# or use directly with npx
+npx skillkit-mcp --help
 ```
 
 ### 2. Initialize a Skills Repository
@@ -26,10 +24,10 @@ Create a repository to store your team's skills:
 
 ```bash
 # Create and initialize a skills repo
-pnpm init:repo ~/my-team-skills
+npx skillkit-mcp init ~/my-team-skills
 
 # Or in an existing directory
-cd ~/my-team-skills && pnpm --prefix /path/to/devskills-ts init:repo .
+cd ~/my-team-skills && npx skillkit-mcp init .
 ```
 
 This creates:
@@ -51,37 +49,13 @@ Add to your VS Code settings (`.vscode/settings.json` or user settings):
 {
   "mcp": {
     "servers": {
-      "devskills": {
+      "skillkit": {
         "type": "stdio",
         "command": "npx",
         "args": [
-          "tsx",
-          "/absolute/path/to/devskills-ts/src/cli.ts",
+          "skillkit-mcp",
           "--skills-path",
-          "/absolute/path/to/my-team-skills/skills"
-        ],
-        "cwd": "/absolute/path/to/devskills-ts"
-      }
-    }
-  }
-}
-```
-
-#### Future MCP Configuration
-
-Once the package is published to npm:
-
-```json
-{
-  "mcp": {
-    "servers": {
-      "devskills": {
-        "type": "stdio",
-        "command": "npx",
-        "args": [
-          "devskills",
-          "--skills-path",
-          "/path/to/skills"
+          "/path/to/my-team-skills"
         ]
       }
     }
@@ -89,14 +63,27 @@ Once the package is published to npm:
 }
 ```
 
-> **Note:** The npm package isn't published yet. Use the development configuration above for now.
+#### Claude Code
+
+Add to your MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "skillkit": {
+      "command": "npx",
+      "args": ["skillkit-mcp", "--skills-path", "/path/to/skills"]
+    }
+  }
+}
+```
 
 ### 4. Create Your First Skill
 
 Ask your AI agent to create a skill:
 
 ```
-I want to create a new skill for [your use case]. Use devskills.
+I want to create a new skill for [your use case]. Use skillkit.
 ```
 
 The agent will use the bundled `skill-creator` skill to guide you through the process interactively - asking about your workflow, generating the directory structure, and writing the SKILL.md file.
@@ -104,31 +91,31 @@ The agent will use the bundled `skill-creator` skill to guide you through the pr
 **Alternative:** Use the CLI to scaffold a skill manually:
 
 ```bash
-pnpm init:skill my-first-skill --path ~/my-team-skills/skills
+npx skillkit-mcp init-skill my-first-skill --path ~/my-team-skills/skills
 ```
 
 ## How to Use
 
-Once configured, mention "use devskills" in your prompt to trigger skill lookup:
+Once configured, mention "use skillkit" in your prompt to trigger skill lookup:
 
 ```
-Help me create a new skill for our deployment workflow. Use devskills.
+Help me create a new skill for our deployment workflow. Use skillkit.
 ```
 
 The agent will:
-1. Call `devskills_list_skills()` to discover available skills
+1. Call `skillkit_list_skills()` to discover available skills
 2. Match your request to a skill description
-3. Call `devskills_get_skill()` to load the full instructions
+3. Call `skillkit_get_skill()` to load the full instructions
 4. Follow the skill's guidance to complete your task
 
 **Example prompts:**
 
 ```
-I need to [task]. Use devskills.
+I need to [task]. Use skillkit.
 ```
 
 ```
-Use devskills to help me with [task].
+Use skillkit to help me with [task].
 ```
 
 If you've created a prompt for a skill, you can also invoke it directly as a slash command (e.g., `/code-review`).
@@ -147,18 +134,18 @@ See [docs/concepts.md](docs/concepts.md) for details.
 
 ## CLI Reference
 
-| pnpm Script | Command | Description |
-|-------------|---------|-------------|
-| `pnpm start` | `devskills` | Start the MCP server |
-| `pnpm init:repo [path]` | `devskills init` | Initialize a skills repository |
-| `pnpm init:skill <name>` | `devskills init-skill` | Create a new skill from template |
-| `pnpm validate <path>` | `devskills validate-skill` | Validate a skill directory |
+| Command | Description |
+|---------|-------------|
+| `skillkit-mcp` | Start the MCP server |
+| `skillkit-mcp init [path]` | Initialize a skills repository |
+| `skillkit-mcp init-skill <name>` | Create a new skill from template |
+| `skillkit-mcp validate <path>` | Validate skills and prompts |
 
 ### Server Options
 
 ```bash
-pnpm start -- --skills-path <paths...>  # Additional skills directories
-pnpm start -- --no-bundled              # Disable bundled default skills
+skillkit-mcp --skills-path <paths...>  # Additional skills directories
+skillkit-mcp --no-bundled              # Disable bundled default skills
 ```
 
 ## Documentation
@@ -168,10 +155,55 @@ pnpm start -- --no-bundled              # Disable bundled default skills
 - [Configuration Guide](docs/configuration.md)
 - [How It Works](docs/how-it-works.md)
 
-## Development
+## Contributing
+
+We welcome contributions! Please follow these guidelines:
+
+1. **Always create a Pull Request** - Direct commits to `main` are not allowed
+2. **Use descriptive PR titles** - They appear in auto-generated release notes
+3. **Add appropriate labels** - Help categorize changes in releases:
+   - `enhancement` / `feature` - New features
+   - `bug` / `fix` - Bug fixes
+   - `documentation` - Docs changes
+   - `breaking-change` - Breaking changes
+
+### Development Setup
 
 ```bash
+git clone https://github.com/mk0e/skillkit-mcp.git
+cd skillkit-mcp
 pnpm install
 pnpm build
 pnpm test
 ```
+
+### First-Time Setup (Maintainers)
+
+1. **Publish manually once** to create the package:
+   ```bash
+   npm login
+   pnpm build && pnpm test
+   pnpm publish --access public
+   ```
+
+2. **Configure Trusted Publishers** on npm:
+   - Go to https://www.npmjs.com/package/skillkit-mcp/access
+   - Add trusted publisher: owner `mk0e`, repo `skillkit-mcp`, workflow `publish.yml`
+
+3. **Configure branch protection** on GitHub:
+   - Go to repository Settings > Branches
+   - Add rule for `main`: require PR, require status checks (select "test")
+
+### Release Process
+
+1. Create feature branch: `git checkout -b feature/my-change`
+2. Make changes and commit
+3. Push and create PR with descriptive title + labels
+4. Merge PR after CI passes
+5. When ready to release:
+   - Update version in `package.json`
+   - Commit: `git commit -m "chore: release vX.Y.Z"`
+   - Push to main
+   - Go to GitHub Releases and create a new release
+   - Click "Generate release notes" for auto-categorized changelog
+   - Publish release - npm package publishes automatically via OIDC

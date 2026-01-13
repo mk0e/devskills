@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import dedent from "dedent";
 import { validatePrompt } from "../../src/validation.js";
 
-const TEST_DIR = join(tmpdir(), `devskills-validation-test-${Date.now()}`);
+const TEST_DIR = join(tmpdir(), `skillkit-validation-test-${Date.now()}`);
 
 describe("validatePrompt", () => {
 	beforeEach(() => {

@@ -1,5 +1,5 @@
 /**
- * MCP server for devskills - exposes skills as tools and prompts.
+ * MCP server for skillkit - exposes skills as tools and prompts.
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -28,7 +28,7 @@ export function createServer(
 	includeBundled: boolean = true,
 ): McpServer {
 	const server = new McpServer({
-		name: "devskills",
+		name: "skillkit",
 		version: VERSION,
 	});
 
@@ -37,19 +37,19 @@ export function createServer(
 
 	// Register tools
 
-	// 1. devskills_list_skills
+	// 1. skillkit_list_skills
 	server.registerTool(
-		"devskills_list_skills",
+		"skillkit_list_skills",
 		{
-			title: "List DevSkills",
+			title: "List Skills",
 			description: dedent`
 				List all available skills with name and description.
 
-				Call this tool FIRST when the user mentions 'devskills' or asks about available skills.
+				Call this tool FIRST when the user mentions 'skillkit' or asks about available skills.
 				Returns an array of {name, description} for each skill.
 
 				After getting the list, if a skill matches the user's task:
-				1. Call devskills_get_skill(name) to fetch the full instructions
+				1. Call skillkit_get_skill(name) to fetch the full instructions
 				2. Follow the instructions in the skill
 			`,
 			inputSchema: {},
@@ -70,15 +70,15 @@ export function createServer(
 		},
 	);
 
-	// 2. devskills_get_skill
+	// 2. skillkit_get_skill
 	server.registerTool(
-		"devskills_get_skill",
+		"skillkit_get_skill",
 		{
 			title: "Get Skill Instructions",
 			description: dedent`
 				Fetch complete instructions for executing a skill.
 
-				Requires: Call devskills_list_skills() first to discover valid skill names.
+				Requires: Call skillkit_list_skills() first to discover valid skill names.
 				Returns the complete skill instructions including:
 				- When to use the skill
 				- Step-by-step instructions to follow
@@ -86,8 +86,8 @@ export function createServer(
 
 				After fetching a skill:
 				- Follow the instructions in the returned content
-				- If instructions reference scripts, fetch them with devskills_get_script()
-				- If instructions reference docs, fetch them with devskills_get_reference()
+				- If instructions reference scripts, fetch them with skillkit_get_script()
+				- If instructions reference docs, fetch them with skillkit_get_reference()
 			`,
 			inputSchema: GetSkillInputSchema,
 			annotations: {
@@ -117,16 +117,16 @@ export function createServer(
 		},
 	);
 
-	// 3. devskills_get_script
+	// 3. skillkit_get_script
 	server.registerTool(
-		"devskills_get_script",
+		"skillkit_get_script",
 		{
 			title: "Get Skill Script",
 			description: dedent`
 				Fetch a script file from a skill's scripts/ folder.
 
 				Only call this when a skill's instructions explicitly reference a script.
-				The skill parameter must be a valid skill name from devskills_list_skills().
+				The skill parameter must be a valid skill name from skillkit_list_skills().
 				The filename should match what's referenced in the skill instructions.
 
 				Returns the raw script content. Execute it locally in your environment
@@ -160,16 +160,16 @@ export function createServer(
 		},
 	);
 
-	// 4. devskills_get_reference
+	// 4. skillkit_get_reference
 	server.registerTool(
-		"devskills_get_reference",
+		"skillkit_get_reference",
 		{
 			title: "Get Skill Reference",
 			description: dedent`
 				Fetch a reference document from a skill's references/ folder.
 
 				Only call this when a skill's instructions explicitly reference a doc.
-				The skill parameter must be a valid skill name from devskills_list_skills().
+				The skill parameter must be a valid skill name from skillkit_list_skills().
 				The filename should match what's referenced in the skill instructions.
 
 				Returns reference documentation to inform how you complete the task.
@@ -203,15 +203,15 @@ export function createServer(
 		},
 	);
 
-	// 5. devskills_get_skill_paths
+	// 5. skillkit_get_skill_paths
 	server.registerTool(
-		"devskills_get_skill_paths",
+		"skillkit_get_skill_paths",
 		{
 			title: "Get Skill Paths",
 			description: dedent`
 				Return writable skill directories where new skills can be created.
 
-				Returns paths configured via --skills-path or DEVSKILLS_SKILLS_PATH.
+				Returns paths configured via --skills-path or SKILLKIT_SKILLS_PATH.
 				Does NOT include the bundled skills directory (which is read-only).
 
 				Use this to determine where to create new skills when using the
@@ -250,7 +250,7 @@ export function createServer(
 				<!--
 				MCP PROMPT: ${promptName}
 				This prompt is already loaded into your context.
-				Do NOT call devskills_get_skill("${promptName}") - it is not a skill.
+				Do NOT call skillkit_get_skill("${promptName}") - it is not a skill.
 				Proceed directly with the instructions below.
 				-->
 

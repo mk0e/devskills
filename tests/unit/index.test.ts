@@ -10,7 +10,7 @@ import dedent from "dedent";
 import { z } from "zod";
 import { PromptManager } from "../../src/index.js";
 
-const TEST_DIR = join(tmpdir(), `devskills-server-test-${Date.now()}`);
+const TEST_DIR = join(tmpdir(), `skillkit-server-test-${Date.now()}`);
 
 describe("createServer prompts", () => {
 	beforeEach(() => {

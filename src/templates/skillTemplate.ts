@@ -41,14 +41,14 @@ export const SKILL_MD_TEMPLATE = dedent`
 
 	To load a helper script:
 	\`\`\`
-	Use devskills_get_script("{name}", "script_name.ts")
+	Use skillkit_get_script("{name}", "script_name.ts")
 	\`\`\`
 
 	### References (if needed)
 
 	For additional context:
 	\`\`\`
-	Use devskills_get_reference("{name}", "reference_name.md")
+	Use skillkit_get_reference("{name}", "reference_name.md")
 	\`\`\`
 `;
 

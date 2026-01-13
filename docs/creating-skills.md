@@ -99,7 +99,7 @@ python scripts/rotate_pdf.py <input.pdf> <degrees> <output.pdf>
 \`\`\`
 ```
 
-The agent retrieves scripts with `devskills_get_script("pdf-editor", "rotate_pdf.py")`.
+The agent retrieves scripts with `skillkit_get_script("pdf-editor", "rotate_pdf.py")`.
 
 ### References (`references/`)
 
@@ -123,7 +123,7 @@ skills/bigquery/
 In SKILL.md, point to references:
 ```markdown
 Before writing queries, load the schema:
-- Use `devskills_get_reference("bigquery", "schema.md")` for table definitions
+- Use `skillkit_get_reference("bigquery", "schema.md")` for table definitions
 ```
 
 **Best practice:** For large reference files (>10k words), include grep patterns in SKILL.md so the agent can search efficiently.
@@ -134,7 +134,7 @@ Before writing queries, load the schema:
 
 ```bash
 # Create skill structure
-devskills init-skill my-skill --path ./skills
+skillkit-mcp init-skill my-skill --path ./skills
 
 # This creates:
 # skills/my-skill/
@@ -153,7 +153,7 @@ touch skills/my-skill/SKILL.md
 ### Validating
 
 ```bash
-devskills validate-skill skills/my-skill
+skillkit-mcp validate-skill skills/my-skill
 ```
 
 Validation checks:
@@ -185,12 +185,12 @@ name: code-review
 description: Start a code review session
 ---
 
-I want to review code for quality and best practices. Use devskills to get the code-review skill and follow its instructions.
+I want to review code for quality and best practices. Use skillkit to get the code-review skill and follow its instructions.
 ```
 
 The prompt body should:
 - Describe user intent in first person
-- Mention "use devskills" so the agent fetches the skill
+- Mention "use skillkit" so the agent fetches the skill
 - Reference the skill name
 
 ## Best Practices
@@ -247,7 +247,7 @@ The description determines when your skill gets used. Make it:
 
 ## Testing Your Skill
 
-1. Configure DevSkills to include your skill directory
+1. Configure SkillKit to include your skill directory
 2. Ask your AI agent to use the skill
 3. Observe any struggles or inefficiencies
 4. Update SKILL.md or resources
@@ -255,5 +255,5 @@ The description determines when your skill gets used. Make it:
 
 ## Next Steps
 
-- [Configuration](configuration.md) - Set up DevSkills with multiple skill repos
+- [Configuration](configuration.md) - Set up SkillKit with multiple skill repos
 - [How It Works](how-it-works.md) - Understand the MCP server architecture

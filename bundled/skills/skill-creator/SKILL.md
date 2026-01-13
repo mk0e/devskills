@@ -151,7 +151,7 @@ Example: For a `big-query` skill handling "How many users logged in today?":
 
 ### Step 3: Create the Skill Directory
 
-1. Call `devskills_get_skill_paths()` to get available skill repository paths.
+1. Call `skillkit_get_skill_paths()` to get available skill repository paths.
 
 2. If multiple paths are returned, ask the user which one to use:
    **"Which skill repository should this skill be created in?"**
@@ -166,7 +166,7 @@ mkdir -p {repoPath}/skills/{skill-name}
 Or use the CLI:
 
 ```bash
-npx devskills init-skill {skill-name} --path {repoPath}/skills
+npx skillkit-mcp init-skill {skill-name} --path {repoPath}/skills
 ```
 
 ### Step 4: Write SKILL.md
@@ -206,12 +206,12 @@ name: {skill-name}
 description: [Short description for prompt listings]
 ---
 
-I need help with [task]. Use devskills to get the {skill-name} skill and follow its instructions exactly.
+I need help with [task]. Use skillkit to get the {skill-name} skill and follow its instructions exactly.
 ```
 
 The prompt body should:
 - Describe the user's intent in first person
-- Mention "use devskills" so the agent loads the skill
+- Mention "use skillkit" so the agent loads the skill
 - Reference the skill name
 
 ### Step 6: Test and Iterate

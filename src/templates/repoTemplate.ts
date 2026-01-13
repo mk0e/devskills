@@ -7,7 +7,7 @@ import dedent from "dedent";
 export const README_TEMPLATE = dedent`
 	# {name}
 
-	Team skills repository for [DevSkills](https://github.com/anthropics/devskills) - reusable knowledge packages for AI coding agents.
+	Team skills repository for [SkillKit](https://github.com/mk0e/skillkit-mcp) - reusable knowledge packages for AI coding agents.
 
 	## Structure
 
@@ -28,11 +28,11 @@ export const README_TEMPLATE = dedent`
 	{
 	  "mcp": {
 	    "servers": {
-	      "devskills": {
+	      "skillkit": {
 	        "type": "stdio",
 	        "command": "npx",
 	        "args": [
-	          "devskills",
+	          "skillkit-mcp",
 	          "--skills-path",
 	          "/absolute/path/to/{name}/skills"
 	        ]
@@ -47,9 +47,9 @@ export const README_TEMPLATE = dedent`
 	\`\`\`json
 	{
 	  "mcpServers": {
-	    "devskills": {
+	    "skillkit": {
 	      "command": "npx",
-	      "args": ["devskills", "--skills-path", "/path/to/{name}/skills"]
+	      "args": ["skillkit-mcp", "--skills-path", "/path/to/{name}/skills"]
 	    }
 	  }
 	}
@@ -57,10 +57,10 @@ export const README_TEMPLATE = dedent`
 
 	## How to Use
 
-	Mention "use devskills" in your prompt:
+	Mention "use skillkit" in your prompt:
 
 	\`\`\`
-	Help me with [task]. Use devskills.
+	Help me with [task]. Use skillkit.
 	\`\`\`
 
 	The agent will discover and load the relevant skill automatically.
@@ -70,7 +70,7 @@ export const README_TEMPLATE = dedent`
 	Ask your AI agent:
 
 	\`\`\`
-	I want to create a new skill for [your use case]. Use devskills.
+	I want to create a new skill for [your use case]. Use skillkit.
 	\`\`\`
 
 	The agent will guide you through the process interactively.
@@ -78,7 +78,7 @@ export const README_TEMPLATE = dedent`
 	**Alternative:** Use the CLI:
 
 	\`\`\`bash
-	npx devskills init-skill my-skill --path ./skills
+	npx skillkit-mcp init-skill my-skill --path ./skills
 	\`\`\`
 
 	## Skills vs Prompts

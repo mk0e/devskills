@@ -14,7 +14,7 @@ import { createServer } from "../../src/index.js";
  * Create a unique temporary directory for tests.
  */
 export function createTestDir(): string {
-	const dir = join(tmpdir(), `devskills-integration-${Date.now()}`);
+	const dir = join(tmpdir(), `skillkit-integration-${Date.now()}`);
 	mkdirSync(dir, { recursive: true });
 	return dir;
 }
