@@ -1,9 +1,12 @@
-import { homedir } from "node:os";
+import { existsSync, rmSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+	cloneOrUpdate,
 	ensureGitInstalled,
 	getCacheDir,
+	GitCloneError,
 	getSkillkitHome,
 	isGitUrl,
 	parseGitUrl,
@@ -171,5 +174,57 @@ describe("gitSource", () => {
 			// Git should be installed on any dev machine running these tests
 			expect(() => ensureGitInstalled()).not.toThrow();
 		});
+	});
+
+	describe("cloneOrUpdate", () => {
+		// Use a small public repo for testing
+		const TEST_REPO = "https://github.com/octocat/Hello-World.git";
+		const TEST_REF = "master";
+
+		// Override SKILLKIT_HOME to use temp dir
+		let originalHome: string | undefined;
+		let testHome: string;
+
+		beforeEach(() => {
+			originalHome = process.env.SKILLKIT_HOME;
+			testHome = join(tmpdir(), `skillkit-git-test-${Date.now()}`);
+			process.env.SKILLKIT_HOME = testHome;
+		});
+
+		afterEach(() => {
+			if (originalHome === undefined) {
+				delete process.env.SKILLKIT_HOME;
+			} else {
+				process.env.SKILLKIT_HOME = originalHome;
+			}
+			if (existsSync(testHome)) {
+				rmSync(testHome, { recursive: true, force: true });
+			}
+		});
+
+		it("clones a public repository", async () => {
+			const localPath = await cloneOrUpdate(TEST_REPO, TEST_REF);
+
+			expect(existsSync(localPath)).toBe(true);
+			expect(existsSync(join(localPath, ".git"))).toBe(true);
+			expect(existsSync(join(localPath, "README"))).toBe(true);
+		}, 30000); // 30 second timeout for network operation
+
+		it("updates existing clone on second call", async () => {
+			const localPath1 = await cloneOrUpdate(TEST_REPO, TEST_REF);
+			const localPath2 = await cloneOrUpdate(TEST_REPO, TEST_REF);
+
+			expect(localPath1).toBe(localPath2);
+			expect(existsSync(localPath2)).toBe(true);
+		}, 60000); // 60 second timeout for two network operations
+
+		it("throws GitCloneError for invalid repo", async () => {
+			await expect(
+				cloneOrUpdate(
+					"https://github.com/nonexistent-org-12345/nonexistent-repo.git",
+					"main",
+				),
+			).rejects.toThrow(GitCloneError);
+		}, 60000); // 60 second timeout for network operation (may take longer due to retries)
 	});
 });
