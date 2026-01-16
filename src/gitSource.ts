@@ -174,3 +174,23 @@ export async function cloneOrUpdate(url: string, ref: string): Promise<string> {
 		throw new GitCloneError(url, gitError);
 	}
 }
+
+/**
+ * Resolves a list of skill sources, cloning git repos as needed.
+ * @returns Array of local paths (git URLs resolved to cache paths)
+ */
+export async function resolveSkillSources(sources: string[]): Promise<string[]> {
+	const resolved: string[] = [];
+
+	for (const source of sources) {
+		if (isGitUrl(source)) {
+			const { url, ref } = parseGitUrl(source);
+			const localPath = await cloneOrUpdate(url, ref ?? "HEAD");
+			resolved.push(localPath);
+		} else {
+			resolved.push(source);
+		}
+	}
+
+	return resolved;
+}

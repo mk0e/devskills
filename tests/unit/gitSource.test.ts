@@ -10,6 +10,7 @@ import {
 	getSkillkitHome,
 	isGitUrl,
 	parseGitUrl,
+	resolveSkillSources,
 } from "../../src/gitSource.js";
 
 describe("gitSource", () => {
@@ -226,5 +227,63 @@ describe("gitSource", () => {
 				),
 			).rejects.toThrow(GitCloneError);
 		}, 60000); // 60 second timeout for network operation (may take longer due to retries)
+	});
+
+	describe("resolveSkillSources", () => {
+		// Use a small public repo for testing
+		const TEST_REPO = "https://github.com/octocat/Hello-World.git";
+		const TEST_REF = "master";
+
+		// Override SKILLKIT_HOME to use temp dir
+		let originalHome: string | undefined;
+		let testHome: string;
+
+		beforeEach(() => {
+			originalHome = process.env.SKILLKIT_HOME;
+			testHome = join(tmpdir(), `skillkit-resolve-test-${Date.now()}`);
+			process.env.SKILLKIT_HOME = testHome;
+		});
+
+		afterEach(() => {
+			if (originalHome === undefined) {
+				delete process.env.SKILLKIT_HOME;
+			} else {
+				process.env.SKILLKIT_HOME = originalHome;
+			}
+			if (existsSync(testHome)) {
+				rmSync(testHome, { recursive: true, force: true });
+			}
+		});
+
+		it("passes through local paths unchanged", async () => {
+			const sources = ["/absolute/path", "~/relative", "./local"];
+			const resolved = await resolveSkillSources(sources);
+			expect(resolved).toEqual(sources);
+		});
+
+		it("resolves git URLs to cache paths", async () => {
+			const sources = [`${TEST_REPO}#${TEST_REF}`];
+			const resolved = await resolveSkillSources(sources);
+
+			expect(resolved.length).toBe(1);
+			// The cache path is under testHome (SKILLKIT_HOME)/cache/repos
+			expect(resolved[0].startsWith(join(testHome, "cache", "repos"))).toBe(true);
+			expect(existsSync(resolved[0])).toBe(true);
+		}, 30000); // 30 second timeout for network operation
+
+		it("handles mixed local and git sources", async () => {
+			const sources = [
+				"/local",
+				`${TEST_REPO}#${TEST_REF}`,
+				"~/another",
+			];
+			const resolved = await resolveSkillSources(sources);
+
+			expect(resolved.length).toBe(3);
+			expect(resolved[0]).toBe("/local");
+			// The cache path is under testHome (SKILLKIT_HOME)/cache/repos
+			expect(resolved[1].startsWith(join(testHome, "cache", "repos"))).toBe(true);
+			expect(resolved[2]).toBe("~/another");
+		}, 30000); // 30 second timeout for network operation
 	});
 });
