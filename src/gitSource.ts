@@ -2,9 +2,36 @@
  * Git source handling for remote skill repositories.
  */
 
+import { execSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { homedir } from "node:os";
 import { join } from "node:path";
+
+/**
+ * Error thrown when git is not installed.
+ */
+export class GitNotInstalledError extends Error {
+	constructor() {
+		super(
+			"[skillkit-mcp] ERROR: Git is required but not found\n\n" +
+				"  Git URLs are configured but 'git' command is not available.\n" +
+				"  Install git: https://git-scm.com/downloads",
+		);
+		this.name = "GitNotInstalledError";
+	}
+}
+
+/**
+ * Ensures git is installed and available.
+ * @throws GitNotInstalledError if git is not found
+ */
+export function ensureGitInstalled(): void {
+	try {
+		execSync("git --version", { stdio: "ignore" });
+	} catch {
+		throw new GitNotInstalledError();
+	}
+}
 
 export interface ParsedGitUrl {
 	url: string;

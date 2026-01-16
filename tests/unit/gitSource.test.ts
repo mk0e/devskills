@@ -2,6 +2,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+	ensureGitInstalled,
 	getCacheDir,
 	getSkillkitHome,
 	isGitUrl,
@@ -162,6 +163,13 @@ describe("gitSource", () => {
 			process.env.SKILLKIT_HOME = "/custom/path";
 			const result = getCacheDir("https://github.com/org/repo.git", "main");
 			expect(result.startsWith("/custom/path/cache/repos")).toBe(true);
+		});
+	});
+
+	describe("ensureGitInstalled", () => {
+		it("does not throw when git is installed", () => {
+			// Git should be installed on any dev machine running these tests
+			expect(() => ensureGitInstalled()).not.toThrow();
 		});
 	});
 });
