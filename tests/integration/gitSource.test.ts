@@ -46,6 +46,8 @@ This is a test skill.
 
     // Initialize as git repo
     execSync("git init", { cwd: repoDir, stdio: "ignore" });
+    execSync('git config user.email "test@test.com"', { cwd: repoDir, stdio: "ignore" });
+    execSync('git config user.name "Test User"', { cwd: repoDir, stdio: "ignore" });
     execSync("git add .", { cwd: repoDir, stdio: "ignore" });
     execSync('git commit -m "init"', { cwd: repoDir, stdio: "ignore" });
 
