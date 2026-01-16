@@ -1,5 +1,12 @@
-import { describe, expect, it } from "vitest";
-import { isGitUrl, parseGitUrl } from "../../src/gitSource.js";
+import { homedir } from "node:os";
+import { join } from "node:path";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import {
+	getCacheDir,
+	getSkillkitHome,
+	isGitUrl,
+	parseGitUrl,
+} from "../../src/gitSource.js";
 
 describe("gitSource", () => {
 	describe("isGitUrl", () => {
@@ -79,6 +86,82 @@ describe("gitSource", () => {
 				url: "git@github.com:org/repo.git",
 				ref: "feature/branch",
 			});
+		});
+	});
+
+	describe("getSkillkitHome", () => {
+		let originalEnv: string | undefined;
+
+		beforeEach(() => {
+			originalEnv = process.env.SKILLKIT_HOME;
+		});
+
+		afterEach(() => {
+			if (originalEnv === undefined) {
+				delete process.env.SKILLKIT_HOME;
+			} else {
+				process.env.SKILLKIT_HOME = originalEnv;
+			}
+		});
+
+		it("returns ~/.skillkit by default", () => {
+			delete process.env.SKILLKIT_HOME;
+			const result = getSkillkitHome();
+			expect(result).toBe(join(homedir(), ".skillkit"));
+		});
+
+		it("respects SKILLKIT_HOME env var when set", () => {
+			process.env.SKILLKIT_HOME = "/custom/skillkit/path";
+			const result = getSkillkitHome();
+			expect(result).toBe("/custom/skillkit/path");
+		});
+	});
+
+	describe("getCacheDir", () => {
+		let originalEnv: string | undefined;
+
+		beforeEach(() => {
+			originalEnv = process.env.SKILLKIT_HOME;
+			delete process.env.SKILLKIT_HOME;
+		});
+
+		afterEach(() => {
+			if (originalEnv === undefined) {
+				delete process.env.SKILLKIT_HOME;
+			} else {
+				process.env.SKILLKIT_HOME = originalEnv;
+			}
+		});
+
+		it("returns path under ~/.skillkit/cache/repos", () => {
+			const result = getCacheDir("https://github.com/org/repo.git", "main");
+			expect(
+				result.startsWith(join(homedir(), ".skillkit", "cache", "repos")),
+			).toBe(true);
+		});
+
+		it("returns consistent hash for same URL and ref", () => {
+			const result1 = getCacheDir("https://github.com/org/repo.git", "v1.0");
+			const result2 = getCacheDir("https://github.com/org/repo.git", "v1.0");
+			expect(result1).toBe(result2);
+		});
+
+		it("returns different hash for different refs", () => {
+			const result1 = getCacheDir("https://github.com/org/repo.git", "v1.0");
+			const result2 = getCacheDir("https://github.com/org/repo.git", "v2.0");
+			expect(result1).not.toBe(result2);
+		});
+
+		it("returns different hash for different URLs", () => {
+			const result1 = getCacheDir("https://github.com/org/repo1.git", "main");
+			const result2 = getCacheDir("https://github.com/org/repo2.git", "main");
+			expect(result1).not.toBe(result2);
+		});
+
+		it("respects SKILLKIT_HOME env var when set", () => {
+			process.env.SKILLKIT_HOME = "/custom/path";
+			const result = getCacheDir("https://github.com/org/repo.git", "main");
+			expect(result.startsWith("/custom/path/cache/repos")).toBe(true);
 		});
 	});
 });

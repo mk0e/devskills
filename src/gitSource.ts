@@ -2,6 +2,10 @@
  * Git source handling for remote skill repositories.
  */
 
+import { createHash } from "node:crypto";
+import { homedir } from "node:os";
+import { join } from "node:path";
+
 export interface ParsedGitUrl {
 	url: string;
 	ref: string | null;
@@ -50,4 +54,22 @@ export function isGitUrl(source: string): boolean {
 	}
 
 	return false;
+}
+
+/**
+ * Gets the skillkit home directory.
+ * Defaults to ~/.skillkit, or uses SKILLKIT_HOME env var if set.
+ */
+export function getSkillkitHome(): string {
+	return process.env.SKILLKIT_HOME ?? join(homedir(), ".skillkit");
+}
+
+/**
+ * Calculates the cache directory for a git repo.
+ * Uses SHA-256 hash of URL#ref to create a unique, deterministic path.
+ */
+export function getCacheDir(url: string, ref: string): string {
+	const cacheKey = `${url}#${ref}`;
+	const hash = createHash("sha256").update(cacheKey).digest("hex").slice(0, 12);
+	return join(getSkillkitHome(), "cache", "repos", hash);
 }
