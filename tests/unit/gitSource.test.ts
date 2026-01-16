@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isGitUrl } from "../../src/gitSource.js";
+import { isGitUrl, parseGitUrl } from "../../src/gitSource.js";
 
 describe("gitSource", () => {
 	describe("isGitUrl", () => {
@@ -37,6 +37,48 @@ describe("gitSource", () => {
 		// HTTPS without .git suffix - should return false
 		it("returns false for HTTPS URL without .git suffix", () => {
 			expect(isGitUrl("https://example.com/page")).toBe(false);
+		});
+	});
+
+	describe("parseGitUrl", () => {
+		it("parses HTTPS URL without ref", () => {
+			const result = parseGitUrl("https://github.com/org/repo.git");
+			expect(result).toEqual({
+				url: "https://github.com/org/repo.git",
+				ref: null,
+			});
+		});
+
+		it("parses HTTPS URL with tag ref", () => {
+			const result = parseGitUrl("https://github.com/org/repo.git#v1.0.0");
+			expect(result).toEqual({
+				url: "https://github.com/org/repo.git",
+				ref: "v1.0.0",
+			});
+		});
+
+		it("parses HTTPS URL with branch ref", () => {
+			const result = parseGitUrl("https://github.com/org/repo.git#main");
+			expect(result).toEqual({
+				url: "https://github.com/org/repo.git",
+				ref: "main",
+			});
+		});
+
+		it("parses SSH URL without ref", () => {
+			const result = parseGitUrl("git@github.com:org/repo.git");
+			expect(result).toEqual({
+				url: "git@github.com:org/repo.git",
+				ref: null,
+			});
+		});
+
+		it("parses SSH URL with feature branch ref", () => {
+			const result = parseGitUrl("git@github.com:org/repo.git#feature/branch");
+			expect(result).toEqual({
+				url: "git@github.com:org/repo.git",
+				ref: "feature/branch",
+			});
 		});
 	});
 });

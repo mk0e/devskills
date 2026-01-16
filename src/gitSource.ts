@@ -2,6 +2,28 @@
  * Git source handling for remote skill repositories.
  */
 
+export interface ParsedGitUrl {
+	url: string;
+	ref: string | null;
+}
+
+/**
+ * Parses a git URL into its components.
+ * Splits on # to separate URL from ref.
+ */
+export function parseGitUrl(source: string): ParsedGitUrl {
+	const hashIndex = source.indexOf("#");
+
+	if (hashIndex === -1) {
+		return { url: source, ref: null };
+	}
+
+	return {
+		url: source.slice(0, hashIndex),
+		ref: source.slice(hashIndex + 1),
+	};
+}
+
 /**
  * Determines if a source string is a git URL (vs local path).
  *
