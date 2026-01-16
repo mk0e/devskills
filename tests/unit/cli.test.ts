@@ -126,6 +126,14 @@ describe("CLI", () => {
 			expect(output).toContain("init");
 			expect(output).toContain("init-skill");
 		});
+
+		it("shows help mentioning git URLs in skills-path description", () => {
+			const output = execSync(`node ${CLI_PATH} --help`, {
+				encoding: "utf-8",
+			});
+			expect(output).toContain("--skills-path");
+			expect(output).toContain("git");
+		});
 	});
 
 	describe("--version", () => {

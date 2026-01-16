@@ -14,6 +14,7 @@ import {
 import { join, resolve } from "node:path";
 import { Command } from "commander";
 
+import { resolveSkillSources } from "./gitSource.js";
 import { runServer } from "./index.js";
 import {
 	GITIGNORE_TEMPLATE,
@@ -33,12 +34,16 @@ program
 	.version(VERSION)
 	.option(
 		"-s, --skills-path <paths...>",
-		"Additional skills directories (can be specified multiple times)",
+		"Skills directories or git URLs (can be specified multiple times). Git URLs: https://github.com/org/repo.git#ref",
 	)
 	.option("--no-bundled", "Disable bundled default skills")
 	.action(async (options: { skillsPath?: string[]; bundled: boolean }) => {
-		// Default action: run MCP server
-		await runServer(options.skillsPath, options.bundled);
+		// Resolve git URLs to local cache paths
+		const resolvedPaths = options.skillsPath
+			? await resolveSkillSources(options.skillsPath)
+			: undefined;
+
+		await runServer(resolvedPaths, options.bundled);
 	});
 
 program
