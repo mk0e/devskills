@@ -122,6 +122,15 @@ skillkit-mcp init-skill <name>   # Create a new skill
 skillkit-mcp validate [path]     # Validate skills and prompts
 ```
 
+## Development
+
+```bash
+pnpm install      # Install dependencies
+pnpm build        # Build the project
+pnpm test         # Run tests
+pnpm docs         # Start docs site locally (http://localhost:3000)
+```
+
 ## License
 
 MIT

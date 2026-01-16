@@ -34,7 +34,10 @@
 		"init:repo": "node dist/cli.js init",
 		"init:skill": "node dist/cli.js init-skill",
 		"validate": "node dist/cli.js validate",
-		"prepublishOnly": "pnpm run build && pnpm run test"
+		"prepublishOnly": "pnpm run build && pnpm run test",
+		"docs": "pnpm --dir website start",
+		"docs:build": "pnpm --dir website build",
+		"docs:serve": "pnpm --dir website serve"
 	},
 	"engines": {
 		"node": ">=18"

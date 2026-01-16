@@ -4,16 +4,17 @@ SkillKit is an MCP server that makes it easy to share and distribute AI agent sk
 
 ## The Problem
 
-AI agent skills are powerful. They teach agents how to follow your team's processes, use your infrastructure, and handle domain-specific tasks. The [skill format](https://agentskills.io) is an open standard supported by major AI coding tools.
+AI agent skills encode how your organization works - coding standards, deployment processes, security practices, domain knowledge. The [skill format](https://agentskills.io) is an open standard supported by major AI coding tools.
 
-But there's a gap: **skills are easy to create, hard to share.**
+But there's a gap: **skills are easy to create, hard to govern at scale.**
 
-| Challenge | What Happens |
-|-----------|--------------|
-| **Distribution** | You create a great skill. How do you get it to 50 developers? Copy folders? |
-| **Versioning** | You improve a skill. How do you update everyone? How do you rollback if something breaks? |
-| **Multi-tool** | Your team uses multiple AI coding tools. Same skill, different setup per tool? |
-| **Custom agents** | You build an agent with LangChain or AWS Strands. No native skill support. Now what? |
+| Challenge | Enterprise Impact |
+|-----------|-------------------|
+| **No central distribution** | 500 developers, each managing skills locally. No consistency, no control. |
+| **No version control** | A skill breaks production. Who changed it? Can you rollback? |
+| **No standardization** | Teams duplicate effort. Best practices stay siloed. |
+| **Tool fragmentation** | GitHub Copilot, custom agents, different frameworks - each needs separate skill setup. |
+| **Knowledge loss** | Senior engineer leaves. Their skills disappear with their laptop. |
 
 ## The Solution
 
