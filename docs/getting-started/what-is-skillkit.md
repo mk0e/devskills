@@ -14,7 +14,6 @@ But there's a gap: **skills are easy to create, hard to govern at scale.**
 | **No version control** | A skill breaks production. Who changed it? Can you rollback? |
 | **No standardization** | Teams duplicate effort. Best practices stay siloed. |
 | **Tool fragmentation** | GitHub Copilot, custom agents, different frameworks - each needs separate skill setup. |
-| **Knowledge loss** | Senior engineer leaves. Their skills disappear with their laptop. |
 
 ## The Solution
 

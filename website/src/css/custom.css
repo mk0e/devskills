@@ -73,14 +73,7 @@
   font-weight: 500;
 }
 
-/* Sidebar - sticky on scroll */
-.theme-doc-sidebar-container {
-  position: sticky;
-  top: var(--ifm-navbar-height);
-  height: calc(100vh - var(--ifm-navbar-height));
-  overflow-y: auto;
-}
-
+/* Sidebar */
 .menu__link {
   border-radius: var(--ifm-global-radius);
   font-weight: 500;
