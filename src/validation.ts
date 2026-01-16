@@ -42,6 +42,54 @@ export interface PromptValidationResult {
 }
 
 /**
+ * Parsed skill frontmatter.
+ */
+export interface SkillFrontmatter {
+	name: string;
+	description: string;
+	license?: string;
+}
+
+/**
+ * Parse SKILL.md content and extract frontmatter.
+ * Returns null if parsing fails or required fields are missing.
+ */
+export function parseSkillFrontmatter(content: string): SkillFrontmatter | null {
+	// Check for frontmatter
+	if (!content.startsWith("---")) {
+		return null;
+	}
+
+	// Extract frontmatter
+	const match = content.match(/^---\n([\s\S]*?)\n---/);
+	if (!match) {
+		return null;
+	}
+
+	try {
+		const parsed = yaml.load(match[1]);
+		if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+			return null;
+		}
+
+		const frontmatter = parsed as Record<string, unknown>;
+
+		// Check required fields
+		if (typeof frontmatter.name !== "string" || typeof frontmatter.description !== "string") {
+			return null;
+		}
+
+		return {
+			name: frontmatter.name,
+			description: frontmatter.description,
+			license: typeof frontmatter.license === "string" ? frontmatter.license : undefined,
+		};
+	} catch {
+		return null;
+	}
+}
+
+/**
  * Validate a skill directory.
  *
  * Checks:

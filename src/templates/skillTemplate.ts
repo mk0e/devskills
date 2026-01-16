@@ -7,7 +7,7 @@ import dedent from "dedent";
 export const SKILL_MD_TEMPLATE = dedent`
 	---
 	name: {name}
-	description: [REQUIRED: Complete trigger description - what task/context should activate this skill? Be specific about when AI agents should discover and use it]
+	description: "TODO: Describe when this skill should be used"
 	---
 
 	# {title}

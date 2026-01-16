@@ -33,10 +33,20 @@ function resolvePath(p: string): string {
 }
 
 /**
+ * Default location for user prompts when no paths are configured.
+ */
+const DEFAULT_SKILLKIT_HOME = join(homedir(), ".skillkit");
+
+/**
  * Manages prompt discovery and content retrieval.
  *
  * Prompts are markdown files with YAML frontmatter that define
  * user-triggered entry points to skills.
+ *
+ * Path resolution (Option B behavior):
+ * - If no extraPaths → use ~/.skillkit/prompts as default
+ * - If extraPaths provided → use ONLY those (no default)
+ * - Bundled prompts always included (unless --no-bundled)
  */
 export class PromptManager {
 	private promptPaths: string[] = [];
@@ -48,6 +58,8 @@ export class PromptManager {
 	 * @param includeBundled - Whether to include bundled default prompts.
 	 */
 	constructor(extraPaths?: string[], includeBundled: boolean = true) {
+		const hasExplicitPaths = extraPaths && extraPaths.length > 0;
+
 		// 1. Extra paths from CLI (highest priority)
 		if (extraPaths) {
 			for (const p of extraPaths) {
@@ -59,7 +71,18 @@ export class PromptManager {
 			}
 		}
 
-		// 2. Bundled prompts (lowest priority)
+		// 2. Default ~/.skillkit/prompts (only if no explicit paths configured)
+		if (!hasExplicitPaths) {
+			const defaultPromptsDir = join(DEFAULT_SKILLKIT_HOME, "prompts");
+			if (
+				existsSync(defaultPromptsDir) &&
+				statSync(defaultPromptsDir).isDirectory()
+			) {
+				this.promptPaths.push(defaultPromptsDir);
+			}
+		}
+
+		// 3. Bundled prompts (lowest priority)
 		if (includeBundled) {
 			const bundled = resolve(__dirname, "..", "bundled", "prompts");
 			if (existsSync(bundled) && statSync(bundled).isDirectory()) {

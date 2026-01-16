@@ -30,15 +30,26 @@ function resolvePath(p: string): string {
 }
 
 /**
+ * Default location for user skills when no paths are configured.
+ */
+const DEFAULT_SKILLKIT_HOME = join(homedir(), ".skillkit");
+
+/**
  * Manages skill discovery and content retrieval.
  *
  * Skills are directories containing a SKILL.md file with YAML frontmatter.
  * Optional scripts/ and references/ subdirectories contain supporting files.
  *
- * Skill paths are configured via (in priority order):
+ * Path resolution (Option B behavior):
+ * - If no extraPaths AND no SKILLKIT_SKILLS_PATH → use ~/.skillkit as default
+ * - If extraPaths OR SKILLKIT_SKILLS_PATH → use ONLY those (no default)
+ * - Bundled skills always included (unless --no-bundled)
+ *
+ * Priority order (highest to lowest):
  * 1. extraPaths parameter (from CLI --skills-path)
- * 2. DEVSKILLS_SKILLS_PATH env var (colon-separated paths)
- * 3. Bundled skills in the package (lowest priority, always included)
+ * 2. SKILLKIT_SKILLS_PATH env var (colon-separated paths)
+ * 3. Default ~/.skillkit (only if no explicit paths configured)
+ * 4. Bundled skills in the package (lowest priority)
  *
  * Skills from higher priority sources override those with matching names.
  */
@@ -53,6 +64,10 @@ export class SkillManager {
 	 * @param includeBundled - Whether to include bundled default skills.
 	 */
 	constructor(extraPaths?: string[], includeBundled: boolean = true) {
+		const hasExtraPaths = extraPaths && extraPaths.length > 0;
+		const hasEnvPaths = (process.env.SKILLKIT_SKILLS_PATH ?? "").trim() !== "";
+		const hasExplicitPaths = hasExtraPaths || hasEnvPaths;
+
 		// 1. Extra paths from CLI (highest priority)
 		if (extraPaths) {
 			for (const p of extraPaths) {
@@ -81,7 +96,20 @@ export class SkillManager {
 			}
 		}
 
-		// 3. Bundled skills (lowest priority, always available)
+		// 3. Default ~/.skillkit (only if no explicit paths configured)
+		if (!hasExplicitPaths) {
+			// Always add to writable paths (directory will be created when needed)
+			this.writablePaths.push(DEFAULT_SKILLKIT_HOME);
+			// Only add to skill paths if it exists (for discovery)
+			if (
+				existsSync(DEFAULT_SKILLKIT_HOME) &&
+				statSync(DEFAULT_SKILLKIT_HOME).isDirectory()
+			) {
+				this.skillPaths.push(DEFAULT_SKILLKIT_HOME);
+			}
+		}
+
+		// 4. Bundled skills (lowest priority, always available)
 		if (includeBundled) {
 			const bundled = resolve(__dirname, "..", "bundled");
 			if (existsSync(bundled) && statSync(bundled).isDirectory()) {

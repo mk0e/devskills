@@ -1,5 +1,5 @@
 /**
- * Templates for the init command - creates a team skills repository.
+ * Templates for the init command - creates a skills repository.
  */
 
 import dedent from "dedent";
@@ -7,22 +7,13 @@ import dedent from "dedent";
 export const README_TEMPLATE = dedent`
 	# {name}
 
-	Team skills repository for [SkillKit](https://github.com/mk0e/skillkit-mcp) - reusable knowledge packages for AI coding agents.
-
-	## Structure
-
-	\`\`\`
-	{name}/
-	├── skills/       # Skill directories (each with SKILL.md)
-	├── prompts/      # User-triggered prompts (slash commands)
-	└── README.md
-	\`\`\`
+	Skills repository for [SkillKit](https://github.com/anthropics/skillkit-mcp).
 
 	## Setup
 
-	### GitHub Copilot (VS Code)
+	Add SkillKit to your MCP configuration:
 
-	Add to your VS Code settings:
+	### Local path
 
 	\`\`\`json
 	{
@@ -31,66 +22,57 @@ export const README_TEMPLATE = dedent`
 	      "skillkit": {
 	        "type": "stdio",
 	        "command": "npx",
-	        "args": [
-	          "skillkit-mcp",
-	          "--skills-path",
-	          "/absolute/path/to/{name}/skills"
-	        ]
+	        "args": ["skillkit-mcp", "--skills-path", "{path}"]
 	      }
 	    }
 	  }
 	}
 	\`\`\`
 
-	### Other MCP Clients
+	### Git URL (after pushing to remote)
 
 	\`\`\`json
 	{
-	  "mcpServers": {
-	    "skillkit": {
-	      "command": "npx",
-	      "args": ["skillkit-mcp", "--skills-path", "/path/to/{name}/skills"]
+	  "mcp": {
+	    "servers": {
+	      "skillkit": {
+	        "type": "stdio",
+	        "command": "npx",
+	        "args": ["skillkit-mcp", "--skills-path", "<your-git-url>#main"]
+	      }
 	    }
 	  }
 	}
 	\`\`\`
 
-	## How to Use
+	## Usage
 
-	Mention "use skillkit" in your prompt:
+	Add \`use skillkit\` to your prompt:
 
 	\`\`\`
-	Help me with [task]. Use skillkit.
+	Help me with [task]. use skillkit
 	\`\`\`
 
-	The agent will discover and load the relevant skill automatically.
+	## Skills
+
+	<!-- SKILLS:START -->
+	| Skill | Description |
+	|-------|-------------|
+	<!-- SKILLS:END -->
 
 	## Creating Skills
 
 	Ask your AI agent:
 
 	\`\`\`
-	I want to create a new skill for [your use case]. Use skillkit.
+	Create a skill for [your use case]. use skillkit
 	\`\`\`
 
-	The agent will guide you through the process interactively.
-
-	**Alternative:** Use the CLI:
+	Or use the CLI:
 
 	\`\`\`bash
 	npx skillkit-mcp init-skill my-skill --path ./skills
 	\`\`\`
-
-	## Skills vs Prompts
-
-	- **Skills** (\`skills/\`): Agent-triggered knowledge packages. The agent discovers and loads them based on the task.
-	- **Prompts** (\`prompts/\`): User-triggered slash commands that explicitly invoke skills.
-
-	## Available Skills
-
-	| Skill | Description |
-	|-------|-------------|
-	| | |
 `;
 
 export const GITIGNORE_TEMPLATE = dedent`
@@ -114,3 +96,9 @@ export const GITIGNORE_TEMPLATE = dedent`
 export const SKILLS_GITKEEP = "# Add your skills here\n";
 
 export const PROMPTS_GITKEEP = "# Add your prompts here\n";
+
+/**
+ * Markers for the skills section in README
+ */
+export const SKILLS_START_MARKER = "<!-- SKILLS:START -->";
+export const SKILLS_END_MARKER = "<!-- SKILLS:END -->";
