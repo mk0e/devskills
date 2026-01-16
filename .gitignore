@@ -70,3 +70,4 @@ package-lock.json
 .claude
 .skills
 .mcp.json
+.worktrees/
