@@ -26,4 +26,5 @@ jobs:
 
       - run: pnpm run test
 
+      - run: npm config set registry https://registry.npmjs.org/
       - run: npm publish --access public --provenance
