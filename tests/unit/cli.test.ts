@@ -41,12 +41,12 @@ describe("CLI", () => {
 		it("creates README with custom name", () => {
 			const targetDir = join(TEST_DIR, "custom-name");
 
-			execSync(`node ${CLI_PATH} init ${targetDir} --name "My Team Skills"`, {
+			execSync(`node ${CLI_PATH} init ${targetDir} --name "My Skills"`, {
 				stdio: "pipe",
 			});
 
 			const readme = readFileSync(join(targetDir, "README.md"), "utf-8");
-			expect(readme).toContain("# My Team Skills");
+			expect(readme).toContain("# My Skills");
 		});
 
 		it("creates .gitkeep files in empty directories", () => {

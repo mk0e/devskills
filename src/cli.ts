@@ -16,6 +16,7 @@ import { Command } from "commander";
 
 import { resolveSkillSources } from "./gitSource.js";
 import { runServer } from "./index.js";
+import { updateReadmeAfterSkillCreation } from "./readmeUpdater.js";
 import {
 	GITIGNORE_TEMPLATE,
 	PROMPTS_GITKEEP,
@@ -48,7 +49,7 @@ program
 
 program
 	.command("init [path]")
-	.description("Initialize a team skills repository")
+	.description("Initialize a skills repository")
 	.option("-n, --name <name>", "Repository name (defaults to directory name)")
 	.option("-f, --force", "Overwrite existing files")
 	.action(
@@ -66,7 +67,7 @@ program
 
 			// Determine repo name
 			const repoName =
-				options.name ?? targetPath.split("/").pop() ?? "Team Skills";
+				options.name ?? targetPath.split("/").pop() ?? "skills";
 
 			// Create skills directory
 			const skillsDir = join(targetPath, "skills");
@@ -97,7 +98,10 @@ program
 			// Create README
 			const readmePath = join(targetPath, "README.md");
 			if (!existsSync(readmePath) || options.force) {
-				writeFileSync(readmePath, README_TEMPLATE.replace("{name}", repoName));
+				const readmeContent = README_TEMPLATE
+					.replace(/{name}/g, repoName)
+					.replace(/{path}/g, targetPath);
+				writeFileSync(readmePath, readmeContent);
 				console.log("Created: README.md");
 			} else {
 				console.log("Skipped: README.md (already exists)");
@@ -172,6 +176,14 @@ program
 		console.log("  ├── SKILL.md");
 		console.log("  ├── scripts/");
 		console.log("  └── references/");
+
+		// Update README skill index if in a skills repo
+		const readmeResult = updateReadmeAfterSkillCreation(basePath);
+		if (readmeResult.updated) {
+			console.log();
+			console.log("Updated README.md skill index");
+		}
+
 		console.log();
 		console.log("Next steps:");
 		console.log(`  1. Edit ${join(skillDir, "SKILL.md")} to define your skill`);

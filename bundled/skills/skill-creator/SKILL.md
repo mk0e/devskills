@@ -169,7 +169,7 @@ Or use the CLI:
 npx skillkit-mcp init-skill {skill-name} --path {repoPath}/skills
 ```
 
-### Step 4: Write SKILL.md
+### Step 4: Write SKILL.md and Update README
 
 #### Frontmatter
 
@@ -189,6 +189,21 @@ description: Comprehensive document creation, editing, and analysis. Use when wo
 #### Body
 
 Write instructions for using the skill and its bundled resources. Use imperative form.
+
+#### Update README (Skills Repos Only)
+
+After creating the skill, update the repository's README.md skill index.
+
+Look for the skills table between `<!-- SKILLS:START -->` and `<!-- SKILLS:END -->` markers and add the new skill:
+
+```markdown
+| Skill | Description |
+|-------|-------------|
+| existing-skill | Existing description |
+| new-skill | New skill description |
+```
+
+Skip this for personal skills in `~/.skillkit/` (no README needed there).
 
 ### Step 5: Create a Prompt (Optional)
 
