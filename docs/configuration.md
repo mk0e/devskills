@@ -88,6 +88,66 @@ export SKILLKIT_SKILLS_PATH="~/work/team-skills/skills:~/personal/my-skills/skil
 
 **Note:** Paths support tilde expansion (`~`) for home directories.
 
+## Remote Git Repositories
+
+You can specify remote git repositories as skill sources. The server will clone them on startup and cache them locally.
+
+### URL Format
+
+```bash
+# HTTPS (requires .git suffix)
+https://github.com/org/repo.git
+https://github.com/org/repo.git#v1.0.0    # specific tag
+https://github.com/org/repo.git#main       # specific branch
+https://github.com/org/repo.git#a1b2c3d    # specific commit
+
+# SSH
+git@github.com:org/repo.git
+git@github.com:org/repo.git#v1.0.0
+```
+
+### Usage Examples
+
+```bash
+# CLI
+skillkit-mcp --skills-path https://github.com/myorg/team-skills.git#v2.0
+
+# Mixed local and remote
+skillkit-mcp --skills-path ~/local-skills --skills-path https://github.com/myorg/team-skills.git
+
+# Environment variable
+export SKILLKIT_SKILLS_PATH="~/local-skills:https://github.com/myorg/team-skills.git#main"
+```
+
+### Cache Location
+
+Cloned repositories are cached in `~/.skillkit/cache/repos/`. To override:
+
+```bash
+export SKILLKIT_HOME=/custom/path
+# Repos cached in /custom/path/cache/repos/
+```
+
+To clear the cache, delete the directory:
+
+```bash
+rm -rf ~/.skillkit/cache/repos
+```
+
+### Authentication
+
+The server uses your system's git configuration for authentication:
+
+- **SSH keys**: Loaded via ssh-agent
+- **HTTPS credentials**: Via git credential helpers
+- **Tokens**: Via environment variables (`GH_TOKEN`, `GITHUB_TOKEN`)
+
+If a clone fails, run the git command manually to debug:
+
+```bash
+git clone https://github.com/org/repo.git
+```
+
 ## AI Agent Configuration
 
 ### GitHub Copilot (VS Code)
